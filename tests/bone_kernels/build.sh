@@ -15,7 +15,7 @@ CXX=${CXX:-c++}
 FLAGS="-O2 -std=c++17 -ffp-contract=off -Wno-everything -I$ROOT/kernels/bone/cpp"
 mkdir -p "$OUT"
 n=1
-for k in sample local jump skin; do
+for k in sample local jump skin blend; do
 	"$CXX" $FLAGS -DBONE_KERNEL=$n -c "$HERE/kernel_tu.cpp" -o "$OUT/$k.full.o"
 	# each emission defines its own main_0: keep only this unit's bone_<k>_run global
 	if [ "$(uname)" = Darwin ]; then
@@ -27,6 +27,7 @@ for k in sample local jump skin; do
 done
 "$CXX" $FLAGS "$HERE/test.cpp" "$OUT/sample.o" "$OUT/local.o" "$OUT/jump.o" "$OUT/skin.o" -o "$OUT/bone_kernels_test"
 "$CXX" $FLAGS "$HERE/sample_test.cpp" "$OUT/sample.o" -o "$OUT/sample_test"
+"$CXX" $FLAGS "$HERE/blend_test.cpp" "$OUT/sample.o" "$OUT/blend.o" -o "$OUT/blend_test"
 rc=0
 for fx in "$HERE"/fixtures/*/; do
 	fx=${fx%/}
@@ -49,5 +50,14 @@ for fx in "$HERE"/fixtures_sample/*/; do
 			echo "control $c failed on $(basename "$fx"), as it must"
 		fi
 	done
+done
+"$OUT/blend_test" "$HERE/fixtures_blend" || rc=1
+for c in --control-order --control-deterministic --control-filter; do
+	if "$OUT/blend_test" "$HERE/fixtures_blend" $c > /dev/null; then
+		echo "control $c passed on blend, so the test cannot see that difference" >&2
+		rc=1
+	else
+		echo "control $c failed on blend, as it must"
+	fi
 done
 exit $rc

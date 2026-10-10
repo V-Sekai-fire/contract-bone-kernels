@@ -13,7 +13,7 @@ set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$HERE/../.." && pwd)"
 SLANGC="${SLANGC:-slangc}"
-KERNELS="bone_sample bone_local bone_jump bone_skin"
+KERNELS="bone_sample bone_blend bone_local bone_jump bone_skin"
 
 if [ "${1:-}" = "--check" ]; then
 	T="$(mktemp -d)"

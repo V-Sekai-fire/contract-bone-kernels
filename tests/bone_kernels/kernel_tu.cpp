@@ -70,4 +70,23 @@ extern "C" void bone_skin_run(uint32_t B, uint32_t *bindBone, float *bindPose, f
 	vi.endGroupID = uint3((B + 63u) / 64u, 1u, 1u);
 	main_0(&vi, nullptr, &g);
 }
+#elif BONE_KERNEL == 5
+#include "bone_blend.cpu.cpp"
+extern "C" void bone_blend_run(uint32_t N, uint32_t I, uint32_t deterministic, float *samp, uint32_t *present, float *weight, float *init,
+		float *motionScale, uint32_t *used, float *localPose) {
+	BoneBlendParams_0 p{ N, I, deterministic };
+	GlobalParams_0 g{};
+	g.params_0 = &p;
+	g.samp_0.data = samp; g.samp_0.count = 10 * size_t(I) * N;
+	g.present_0.data = present; g.present_0.count = size_t(I) * N;
+	g.weight_0.data = weight; g.weight_0.count = size_t(I) * N;
+	g.init_0.data = init; g.init_0.count = 10 * size_t(N);
+	g.motionScale_0.data = motionScale; g.motionScale_0.count = N;
+	g.used_0.data = used; g.used_0.count = N;
+	g.localPose_0.data = localPose; g.localPose_0.count = 10 * size_t(N);
+	ComputeVaryingInput vi{};
+	vi.startGroupID = uint3(0u, 0u, 0u);
+	vi.endGroupID = uint3((N + 63u) / 64u, 1u, 1u);
+	main_0(&vi, nullptr, &g);
+}
 #endif
