@@ -9,9 +9,13 @@ Restates, for position, rotation and scale tracks on skeleton bones, the
 engine mixer's `_blend_init`, `_blend_calc_total_weight`, the bone arms of
 `_blend_process`, and `_blend_apply`:
 
-1. Start from the init pose, the bone's rest (the host fills `init`). For
-   skeleton bones the engine does not seed it from the RESET animation; RESET
-   only seeds tracks on other 3D nodes.
+1. Start from the init pose (the host fills `init`). For a skeleton bone it is
+   the rest. The same kernel serves the mixer's other blended targets, with
+   motion scale 1: a Node3D transform starts from identity, except the one
+   channel of the track that creates its cache (the first track for that node
+   in the mixer's animation and track order), which takes the RESET
+   animation's first key when RESET has that track; a blend shape (a scalar
+   in the position slot's `x`) starts from RESET's key, else 0.
 2. `total` is the sum over animation instances of the bone's weight, counted
    once per instance that has any enabled track for the bone.
 3. Not deterministic and `|total| < 1e-5`: the bone is not written.

@@ -36,7 +36,7 @@ The build finds the repositories it needs as sibling checkouts, at their paths i
 
 `tests/bone_kernels/fixtures_blend/` is the engine's own AnimationTree output for 24 bones over 10 frames. Three clips are mixed by a Blend2 node with a bone filter, then an Add2 node. `blend_test` checks `bone_sample` and `bone_blend` against it. Its controls must fail: one blends the clips in reverse order, one flips the deterministic flag, and one ignores the filter.
 
-In the engine, blend-shape tracks and transform tracks on other 3D nodes blend by the same rule, but start from the RESET animation (not the rest) and have no motion scale. Feeding them to `bone_blend` that way is not yet tested against the engine. Not covered yet: root motion, and value, bezier, method, audio and animation tracks.
+Blend shapes and transform tracks on other 3D nodes go through `bone_blend` too, with motion scale 1 and a start value the host takes from the RESET animation as the engine does. For a node, RESET seeds only the channel of the first track that creates the node's cache, in the mixer's order (libraries, then their animations as added, then track index); the other channels start from identity and unit scale. `tests/bone_kernels/fixtures_blend_nodes/` checks this against the engine's AnimationTree with six Node3D nodes and four blend shapes; node targets compare by transform, since reading a node's position, rotation and scale back moves negative scale signs into the rotation. Not covered yet: root motion, and value, bezier, method, audio and animation tracks.
 
 ## Licence
 

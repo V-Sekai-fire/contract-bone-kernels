@@ -2,7 +2,10 @@
 // mixer. The fixture (fixtures_blend/, meta.json says how it was made) holds three clips' track
 // tables, each clip's per-bone weight per frame (Blend2 with a filter, then Add2), the bones' init
 // (rest) pose, motion scale, used channels, the pose before each frame, and the engine's pose after.
-// Rotations compare up to sign; differences are relative to max(1, |engine value|).
+// Rotations compare up to sign; differences are relative to max(1, |engine value|). A fixture of
+// non-bone targets (meta "xform_targets": X) compares targets below X by their node transform
+// (expect_xform.bin, 3x4 rows), since reading position/rotation/scale back from a node re-decomposes
+// negative scale, and the rest (blend shapes) by the scalar in slot 0.
 //   blend_test <dir>                          must pass (worst relative diff <= 1e-4)
 //   blend_test <dir> --control-order          blends the clips in reverse order; must fail
 //   blend_test <dir> --control-deterministic  flips the deterministic flag; must fail
@@ -106,6 +109,15 @@ int main(int argc, char **argv) {
 	auto weight = load<float>(d + "/weight.bin");
 	auto pre = load<float>(d + "/pre_pose.bin");
 	auto expect = load<float>(d + "/expect.bin");
+	uint32_t X = 0;
+	std::vector<float> expectXf;
+	{
+		std::smatch xm;
+		if (std::regex_search(meta, xm, std::regex("\"xform_targets\"\\s*:\\s*([0-9]+)"))) {
+			X = uint32_t(std::stoul(xm[1]));
+			expectXf = load<float>(d + "/expect_xform.bin");
+		}
+	}
 
 	double worst = 0.0;
 	size_t wf = 0, wb = 0;
@@ -144,7 +156,41 @@ int main(int argc, char **argv) {
 		std::vector<float> pose(pre.begin() + f * N * 10, pre.begin() + (f + 1) * N * 10);
 		bone_blend_run(N, I, det, samp.data(), pr.data(), w.data(), init.data(), ms.data(), used.data(), pose.data());
 		const float *o = &expect[f * N * 10];
-		for (uint32_t b = 0; b < N; b++) {
+		for (uint32_t b = 0; b < X; b++) {
+			// Basis(q).scaled_local(s) with origin p, as the engine's set_transform; 3x4 rows.
+			const float *k = &pose[b * 10];
+			double q[4] = { k[3], k[4], k[5], k[6] };
+			const double qn = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+			for (double &c : q) {
+				c /= qn;
+			}
+			const double x = q[0], y = q[1], z = q[2], w = q[3];
+			const double R[3][3] = { { 1 - 2 * (y * y + z * z), 2 * (x * y - w * z), 2 * (x * z + w * y) },
+				{ 2 * (x * y + w * z), 1 - 2 * (x * x + z * z), 2 * (y * z - w * x) },
+				{ 2 * (x * z - w * y), 2 * (y * z + w * x), 1 - 2 * (x * x + y * y) } };
+			const float *ex = &expectXf[(f * X + b) * 12];
+			double e = 0.0;
+			for (int r = 0; r < 3; r++) {
+				for (int c = 0; c < 4; c++) {
+					const double g = c < 3 ? R[r][c] * k[7 + c] : k[r];
+					e = std::fmax(e, std::fabs(g - ex[r * 4 + c]) / std::fmax(1.0, std::fabs(double(ex[r * 4 + c]))));
+				}
+			}
+			if (std::isnan(e) || e > worst) {
+				worst = std::isnan(e) ? INFINITY : e;
+				wf = f;
+				wb = b;
+			}
+		}
+		for (uint32_t b = X; X > 0 && b < N; b++) {
+			const double e = std::fabs(double(pose[b * 10]) - o[b * 10]) / std::fmax(1.0, std::fabs(double(o[b * 10])));
+			if (std::isnan(e) || e > worst) {
+				worst = std::isnan(e) ? INFINITY : e;
+				wf = f;
+				wb = b;
+			}
+		}
+		for (uint32_t b = 0; X == 0 && b < N; b++) {
 			const int groups[3][2] = { { 0, 3 }, { 3, 7 }, { 7, 10 } };
 			for (auto &g : groups) {
 				double e = 0.0, en = 0.0;
@@ -165,7 +211,7 @@ int main(int argc, char **argv) {
 		}
 	}
 	const bool ok = worst <= 1e-4;
-	std::printf("%s  blend%s: bone_sample + bone_blend C++ emission vs the engine's AnimationTree, %u clips, %u bones, %zu frames: worst relative diff %.3g (frame %zu, bone %zu)\n",
-			ok ? "PASS" : "FAIL", mode.empty() ? "" : (" " + mode).c_str(), I, N, F, worst, wf, wb);
+	std::printf("%s  %s%s: bone_sample + bone_blend C++ emission vs the engine's AnimationTree, %u clips, %u targets, %zu frames: worst relative diff %.3g (frame %zu, target %zu)\n",
+			ok ? "PASS" : "FAIL", d.substr(d.find_last_of('/') + 1).c_str(), mode.empty() ? "" : (" " + mode).c_str(), I, N, F, worst, wf, wb);
 	return ok ? 0 : 1;
 }

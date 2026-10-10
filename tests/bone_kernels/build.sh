@@ -51,13 +51,15 @@ for fx in "$HERE"/fixtures_sample/*/; do
 		fi
 	done
 done
-"$OUT/blend_test" "$HERE/fixtures_blend" || rc=1
-for c in --control-order --control-deterministic --control-filter; do
-	if "$OUT/blend_test" "$HERE/fixtures_blend" $c > /dev/null; then
-		echo "control $c passed on blend, so the test cannot see that difference" >&2
-		rc=1
-	else
-		echo "control $c failed on blend, as it must"
-	fi
+for fx in "$HERE"/fixtures_blend "$HERE"/fixtures_blend_nodes; do
+	"$OUT/blend_test" "$fx" || rc=1
+	for c in --control-order --control-deterministic --control-filter; do
+		if "$OUT/blend_test" "$fx" $c > /dev/null; then
+			echo "control $c passed on $(basename "$fx"), so the test cannot see that difference" >&2
+			rc=1
+		else
+			echo "control $c failed on $(basename "$fx"), as it must"
+		fi
+	done
 done
 exit $rc
