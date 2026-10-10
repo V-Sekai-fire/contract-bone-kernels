@@ -100,12 +100,7 @@ private def slots : List (String × Int) := [("m2", -2), ("m1", -1), ("n0", 0), 
 private def kv (n : String) : E :=
   call "float4" ((List.range 4).map fun c => at_ "keyVal" ((v "off" + toU (v ("k" ++ n))) * u 4 + u c))
 
-private def writeVec (e : E) : List St :=
-  [ let_ f4T "res" e
-  , if_ (eq (v "kind") (u 0))
-      ((["x", "y", "z"].zipIdx).map fun (c, k) => setAt "localPose" (v "dst" + u k) (mem (v "res") c))
-      ((["x", "y", "z", "w"].zipIdx).map fun (c, k) => setAt "localPose" (v "dst" + u k) (mem (v "res") c))
-  , ret ]
+private def writeVec (e : E) : List St := [ retE e ]
 
 private def vecCubic : E :=
   call "float4" ((["x", "y", "z"].map fun c =>
@@ -117,27 +112,19 @@ private def vecMakima : E :=
     call "bk_makima" [mem (v "vn0") c, mem (v "vn1") c, mem (v "vm1") c, mem (v "vn2") c, mem (v "vm2") c, mem (v "vn3") c,
       v "w", call "bk_df_sub" [v "tn1", v "tn0"], call "bk_df_sub" [v "tm1", v "tn0"], call "bk_df_sub" [v "tn2", v "tn0"], call "bk_df_sub" [v "tm2", v "tn0"], call "bk_df_sub" [v "tn3", v "tn0"]]) ++ [fl 0.0])
 
-def shader : SlangShaderModule :=
-  { structs := [ { name := "BoneSampleParams"
-                 , fields := [fld "T" uT, fld "time" fT, fld "length" fT, fld "loopMode" uT, fld "backward" uT, fld "timeLo" fT, fld "lengthLo" fT] } ]
-  , globals :=
-      [ paramsCB "BoneSampleParams", roU "trackKeys" 1, roU "trackDst" 2, roU "trackKind" 3,
-        roF "keyTime" 4, roF "keyVal" 5, roF "keyTrans" 6, rwF "localPose" 7, roF "keyTimeLo" 8 ]
-  , functions := Curves.all ++ [ fetchIdx, fetchTime,
-      entry 64 [dtid]
-          ([ let_ uT "i" (.member (v "tid") "x")
-           , if_ (ge (v "i") (p "T")) [ ret ]
-           , let_ uT "off" (at_ "trackKeys" (v "i" * u 2))
+/-- The engine's track sampler for track `i` at df32 time `tdf` (clip length `Ldf`, loop mode
+`loopMode`, `backward` for nearest keys): the value as `float4` (vector in `xyz`, quaternion in
+`xyzw`, scalar in `x`). `bone_sample` and `root_motion` both sample through it. -/
+def sampleFn : SlangFunctionDecl :=
+  fn f4T "bk_sample" [("i", uT), ("tdf", f2T), ("Ldf", f2T), ("loopMode", uT), ("backward", uT)]
+          ([ let_ uT "off" (at_ "trackKeys" (v "i" * u 2))
            , let_ iT "len" (toI (at_ "trackKeys" (v "i" * u 2 + u 1)))
-           , let_ uT "dst" (at_ "trackDst" (v "i"))
            , let_ uT "flags" (at_ "trackKind" (v "i"))
            , let_ uT "kind" (.bin "&" (v "flags") (u 1))
            , let_ uT "interp" (.bin "&" (.bin ">>" (v "flags") (u 1)) (u 7))
-           , let_ bT "wrap" (and_ (ne (.bin "&" (.bin ">>" (v "flags") (u 4)) (u 1)) (u 0)) (ne (p "loopMode") (u 0)))
-           , let_ bT "back" (and_ (ne (p "backward") (u 0)) (eq (v "interp") (u 0)))
-           , let_ fT "t" (p "time")
-           , let_ f2T "tdf" (call "float2" [p "time", p "timeLo"])
-           , let_ f2T "Ldf" (call "float2" [p "length", p "lengthLo"])
+           , let_ bT "wrap" (and_ (ne (.bin "&" (.bin ">>" (v "flags") (u 4)) (u 1)) (u 0)) (ne (v "loopMode") (u 0)))
+           , let_ bT "back" (and_ (ne (v "backward") (u 0)) (eq (v "interp") (u 0)))
+           , let_ fT "t" (mem (v "tdf") "x")
            , let_ iT "k0" (fi 0)
            , let_ f4T "vk0" (kv "0") ] ++
            [ if_ (eq (v "len") (fi 1)) (writeVec (v "vk0")) ] ++
@@ -162,9 +149,9 @@ def shader : SlangShaderModule :=
            (slots.map fun (n, j) =>
              let_ iT ("p" ++ n) (sel (v "back") (v "base" - fi j) (v "base" + fi j))) ++
            (slots.map fun (n, _) =>
-             let_ iT ("k" ++ n) (call "bk_fetch_idx" [v ("p" ++ n), v "len", v "wrap", p "loopMode"])) ++
+             let_ iT ("k" ++ n) (call "bk_fetch_idx" [v ("p" ++ n), v "len", v "wrap", v "loopMode"])) ++
            (slots.map fun (n, _) =>
-             let_ f2T ("t" ++ n) (call "bk_fetch_time" [v ("p" ++ n), v "len", v "wrap", p "loopMode", v "off", v "Ldf"])) ++
+             let_ f2T ("t" ++ n) (call "bk_fetch_time" [v ("p" ++ n), v "len", v "wrap", v "loopMode", v "off", v "Ldf"])) ++
            (slots.map fun (n, _) => let_ f4T ("v" ++ n) (kv n)) ++
            [ let_ fT "tr" (at_ "keyTrans" (v "off" + toU (v "kn0")))
            , if_ (eq (v "tr") (fl 0.0)) (writeVec (v "vn0"))
@@ -195,6 +182,31 @@ def shader : SlangShaderModule :=
            , if_ (eq (v "kind") (u 0))
                (writeVec vecMakima)
                (writeVec (call "bk_sq_makima" [v "vn0", v "vn1", v "vm1", v "vn2", v "vm2", v "vn3", v "w",
-                  call "bk_df_sub" [v "tn1", v "tn0"], call "bk_df_sub" [v "tm1", v "tn0"], call "bk_df_sub" [v "tn2", v "tn0"], call "bk_df_sub" [v "tm2", v "tn0"], call "bk_df_sub" [v "tn3", v "tn0"]])) ]) ] }
+                  call "bk_df_sub" [v "tn1", v "tn0"], call "bk_df_sub" [v "tm1", v "tn0"], call "bk_df_sub" [v "tn2", v "tn0"], call "bk_df_sub" [v "tm2", v "tn0"], call "bk_df_sub" [v "tn3", v "tn0"]])) ])
+
+/-- The helpers `bk_sample` needs, callees first. -/
+def sampleFns : List SlangFunctionDecl := Curves.all ++ [ fetchIdx, fetchTime, sampleFn ]
+
+/-- The globals `bk_sample` reads, at the given bindings: track keys, kinds, key times (hi, lo),
+values and transitions. -/
+def sampleGlobals (keys kind time val trans timeLo : Nat) : List SlangBinding :=
+  [ roU "trackKeys" keys, roU "trackKind" kind, roF "keyTime" time, roF "keyVal" val, roF "keyTrans" trans, roF "keyTimeLo" timeLo ]
+
+def shader : SlangShaderModule :=
+  { structs := [ { name := "BoneSampleParams"
+                 , fields := [fld "T" uT, fld "time" fT, fld "length" fT, fld "loopMode" uT, fld "backward" uT, fld "timeLo" fT, fld "lengthLo" fT] } ]
+  , globals :=
+      [ paramsCB "BoneSampleParams", roU "trackDst" 2, rwF "localPose" 7 ] ++ sampleGlobals 1 3 4 5 6 8
+  , functions := sampleFns ++ [
+      entry 64 [dtid]
+          [ let_ uT "i" (.member (v "tid") "x")
+          , if_ (ge (v "i") (p "T")) [ ret ]
+          , let_ uT "dst" (at_ "trackDst" (v "i"))
+          , let_ uT "flags" (at_ "trackKind" (v "i"))
+          , let_ f4T "res" (call "bk_sample" [v "i", call "float2" [p "time", p "timeLo"], call "float2" [p "length", p "lengthLo"],
+              p "loopMode", p "backward"])
+          , if_ (eq (.bin "&" (v "flags") (u 1)) (u 0))
+              ((["x", "y", "z"].zipIdx).map fun (c, k) => setAt "localPose" (v "dst" + u k) (mem (v "res") c))
+              ((["x", "y", "z", "w"].zipIdx).map fun (c, k) => setAt "localPose" (v "dst" + u k) (mem (v "res") c)) ] ] }
 
 end Bone.SlangCodegen.Sample

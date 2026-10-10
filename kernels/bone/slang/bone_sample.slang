@@ -10,10 +10,12 @@ struct BoneSampleParams {
 
 [[vk::binding(0, 0)]]
 ConstantBuffer<BoneSampleParams> params;
-[[vk::binding(1, 0)]]
-StructuredBuffer<uint> trackKeys;
 [[vk::binding(2, 0)]]
 StructuredBuffer<uint> trackDst;
+[[vk::binding(7, 0)]]
+RWStructuredBuffer<float> localPose;
+[[vk::binding(1, 0)]]
+StructuredBuffer<uint> trackKeys;
 [[vk::binding(3, 0)]]
 StructuredBuffer<uint> trackKind;
 [[vk::binding(4, 0)]]
@@ -22,8 +24,6 @@ StructuredBuffer<float> keyTime;
 StructuredBuffer<float> keyVal;
 [[vk::binding(6, 0)]]
 StructuredBuffer<float> keyTrans;
-[[vk::binding(7, 0)]]
-RWStructuredBuffer<float> localPose;
 [[vk::binding(8, 0)]]
 StructuredBuffer<float> keyTimeLo;
 
@@ -351,38 +351,19 @@ float2 bk_fetch_time(int p, int len, bool wrap, uint mode, uint off, float2 L) {
   return bk_df_sub(bk_df_mulf(L, float((cyc + 1))), float2(keyTime[(off + uint(((len - 1) - idx)))], keyTimeLo[(off + uint(((len - 1) - idx)))]));
 }
 
-[shader("compute")] [numthreads(64, 1, 1)]
-void main(uint3 tid : SV_DispatchThreadID) {
-  uint i = tid.x;
-  if ((i >= params.T)) {
-    return;
-  }
+float4 bk_sample(uint i, float2 tdf, float2 Ldf, uint loopMode, uint backward) {
   uint off = trackKeys[(i * 2u)];
   int len = int(trackKeys[((i * 2u) + 1u)]);
-  uint dst = trackDst[i];
   uint flags = trackKind[i];
   uint kind = (flags & 1u);
   uint interp = ((flags >> 1u) & 7u);
-  bool wrap = ((((flags >> 4u) & 1u) != 0u) && (params.loopMode != 0u));
-  bool back = ((params.backward != 0u) && (interp == 0u));
-  float t = params.time;
-  float2 tdf = float2(params.time, params.timeLo);
-  float2 Ldf = float2(params.length, params.lengthLo);
+  bool wrap = ((((flags >> 4u) & 1u) != 0u) && (loopMode != 0u));
+  bool back = ((backward != 0u) && (interp == 0u));
+  float t = tdf.x;
   int k0 = 0;
   float4 vk0 = float4(keyVal[(((off + uint(k0)) * 4u) + 0u)], keyVal[(((off + uint(k0)) * 4u) + 1u)], keyVal[(((off + uint(k0)) * 4u) + 2u)], keyVal[(((off + uint(k0)) * 4u) + 3u)]);
   if ((len == 1)) {
-    float4 res = vk0;
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return vk0;
   }
   int low = 0;
   int high = (len - 1);
@@ -420,18 +401,18 @@ void main(uint3 tid : SV_DispatchThreadID) {
   int pn1 = (back ? (base - 1) : (base + 1));
   int pn2 = (back ? (base - 2) : (base + 2));
   int pn3 = (back ? (base - 3) : (base + 3));
-  int km2 = bk_fetch_idx(pm2, len, wrap, params.loopMode);
-  int km1 = bk_fetch_idx(pm1, len, wrap, params.loopMode);
-  int kn0 = bk_fetch_idx(pn0, len, wrap, params.loopMode);
-  int kn1 = bk_fetch_idx(pn1, len, wrap, params.loopMode);
-  int kn2 = bk_fetch_idx(pn2, len, wrap, params.loopMode);
-  int kn3 = bk_fetch_idx(pn3, len, wrap, params.loopMode);
-  float2 tm2 = bk_fetch_time(pm2, len, wrap, params.loopMode, off, Ldf);
-  float2 tm1 = bk_fetch_time(pm1, len, wrap, params.loopMode, off, Ldf);
-  float2 tn0 = bk_fetch_time(pn0, len, wrap, params.loopMode, off, Ldf);
-  float2 tn1 = bk_fetch_time(pn1, len, wrap, params.loopMode, off, Ldf);
-  float2 tn2 = bk_fetch_time(pn2, len, wrap, params.loopMode, off, Ldf);
-  float2 tn3 = bk_fetch_time(pn3, len, wrap, params.loopMode, off, Ldf);
+  int km2 = bk_fetch_idx(pm2, len, wrap, loopMode);
+  int km1 = bk_fetch_idx(pm1, len, wrap, loopMode);
+  int kn0 = bk_fetch_idx(pn0, len, wrap, loopMode);
+  int kn1 = bk_fetch_idx(pn1, len, wrap, loopMode);
+  int kn2 = bk_fetch_idx(pn2, len, wrap, loopMode);
+  int kn3 = bk_fetch_idx(pn3, len, wrap, loopMode);
+  float2 tm2 = bk_fetch_time(pm2, len, wrap, loopMode, off, Ldf);
+  float2 tm1 = bk_fetch_time(pm1, len, wrap, loopMode, off, Ldf);
+  float2 tn0 = bk_fetch_time(pn0, len, wrap, loopMode, off, Ldf);
+  float2 tn1 = bk_fetch_time(pn1, len, wrap, loopMode, off, Ldf);
+  float2 tn2 = bk_fetch_time(pn2, len, wrap, loopMode, off, Ldf);
+  float2 tn3 = bk_fetch_time(pn3, len, wrap, loopMode, off, Ldf);
   float4 vm2 = float4(keyVal[(((off + uint(km2)) * 4u) + 0u)], keyVal[(((off + uint(km2)) * 4u) + 1u)], keyVal[(((off + uint(km2)) * 4u) + 2u)], keyVal[(((off + uint(km2)) * 4u) + 3u)]);
   float4 vm1 = float4(keyVal[(((off + uint(km1)) * 4u) + 0u)], keyVal[(((off + uint(km1)) * 4u) + 1u)], keyVal[(((off + uint(km1)) * 4u) + 2u)], keyVal[(((off + uint(km1)) * 4u) + 3u)]);
   float4 vn0 = float4(keyVal[(((off + uint(kn0)) * 4u) + 0u)], keyVal[(((off + uint(kn0)) * 4u) + 1u)], keyVal[(((off + uint(kn0)) * 4u) + 2u)], keyVal[(((off + uint(kn0)) * 4u) + 3u)]);
@@ -440,18 +421,7 @@ void main(uint3 tid : SV_DispatchThreadID) {
   float4 vn3 = float4(keyVal[(((off + uint(kn3)) * 4u) + 0u)], keyVal[(((off + uint(kn3)) * 4u) + 1u)], keyVal[(((off + uint(kn3)) * 4u) + 2u)], keyVal[(((off + uint(kn3)) * 4u) + 3u)]);
   float tr = keyTrans[(off + uint(kn0))];
   if ((tr == 0.000000)) {
-    float4 res = vn0;
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return vn0;
   }
   float dlt = (bk_df_sub(tn1, tn0).x + bk_df_sub(tn1, tn0).y);
   float w = ((abs(dlt) < 0.00001f) ? 0.000000 : ((bk_df_sub(tdf, tn0).x + bk_df_sub(tdf, tn0).y) / dlt));
@@ -459,145 +429,56 @@ void main(uint3 tid : SV_DispatchThreadID) {
     w = bk_ease(w, tr);
   }
   if ((interp == 0u)) {
-    float4 res = vn0;
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return vn0;
   }
   bool scalar = (((flags >> 5u) & 1u) != 0u);
   if ((scalar && (interp == 3u))) {
-    float4 res = float4(bk_fposmod((vn0.x + (bk_angle_diff(vn0.x, vn1.x) * w)), 6.2831855f), 0.000000, 0.000000, 0.000000);
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return float4(bk_fposmod((vn0.x + (bk_angle_diff(vn0.x, vn1.x) * w)), 6.2831855f), 0.000000, 0.000000, 0.000000);
   }
   if ((scalar && (interp == 4u))) {
-    float4 res = float4(bk_fposmod(bk_cubic_angle(vn0.x, vn1.x, vm1.x, vn2.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), 6.2831855f), 0.000000, 0.000000, 0.000000);
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return float4(bk_fposmod(bk_cubic_angle(vn0.x, vn1.x, vm1.x, vn2.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), 6.2831855f), 0.000000, 0.000000, 0.000000);
   }
   if ((scalar && (interp == 6u))) {
-    float4 res = float4(bk_fposmod(bk_makima_angle(vn0.x, vn1.x, vm1.x, vn2.x, vm2.x, vn3.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), 6.2831855f), 0.000000, 0.000000, 0.000000);
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return float4(bk_fposmod(bk_makima_angle(vn0.x, vn1.x, vm1.x, vn2.x, vm2.x, vn3.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), 6.2831855f), 0.000000, 0.000000, 0.000000);
   }
   if (((interp == 1u) || (interp == 3u))) {
     if ((kind == 0u)) {
-      float4 res = (vn0 + ((vn1 - vn0) * w));
-      if ((kind == 0u)) {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-      } else {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-        localPose[(dst + 3u)] = res.w;
-      }
-      return;
+      return (vn0 + ((vn1 - vn0) * w));
     } else {
-      float4 res = bk_slerp(vn0, vn1, w);
-      if ((kind == 0u)) {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-      } else {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-        localPose[(dst + 3u)] = res.w;
-      }
-      return;
+      return bk_slerp(vn0, vn1, w);
     }
   }
   if (((interp == 2u) || (interp == 4u))) {
     if ((kind == 0u)) {
-      float4 res = float4(bk_cubic(vn0.x, vn1.x, vm1.x, vn2.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), bk_cubic(vn0.y, vn1.y, vm1.y, vn2.y, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), bk_cubic(vn0.z, vn1.z, vm1.z, vn2.z, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), 0.000000);
-      if ((kind == 0u)) {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-      } else {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-        localPose[(dst + 3u)] = res.w;
-      }
-      return;
+      return float4(bk_cubic(vn0.x, vn1.x, vm1.x, vn2.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), bk_cubic(vn0.y, vn1.y, vm1.y, vn2.y, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), bk_cubic(vn0.z, vn1.z, vm1.z, vn2.z, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0)), 0.000000);
     } else {
-      float4 res = bk_sq_cubic(vn0, vn1, vm1, vn2, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0));
-      if ((kind == 0u)) {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-      } else {
-        localPose[(dst + 0u)] = res.x;
-        localPose[(dst + 1u)] = res.y;
-        localPose[(dst + 2u)] = res.z;
-        localPose[(dst + 3u)] = res.w;
-      }
-      return;
+      return bk_sq_cubic(vn0, vn1, vm1, vn2, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0));
     }
   }
   if ((kind == 0u)) {
-    float4 res = float4(bk_makima(vn0.x, vn1.x, vm1.x, vn2.x, vm2.x, vn3.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), bk_makima(vn0.y, vn1.y, vm1.y, vn2.y, vm2.y, vn3.y, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), bk_makima(vn0.z, vn1.z, vm1.z, vn2.z, vm2.z, vn3.z, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), 0.000000);
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
-    return;
+    return float4(bk_makima(vn0.x, vn1.x, vm1.x, vn2.x, vm2.x, vn3.x, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), bk_makima(vn0.y, vn1.y, vm1.y, vn2.y, vm2.y, vn3.y, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), bk_makima(vn0.z, vn1.z, vm1.z, vn2.z, vm2.z, vn3.z, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0)), 0.000000);
   } else {
-    float4 res = bk_sq_makima(vn0, vn1, vm1, vn2, vm2, vn3, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0));
-    if ((kind == 0u)) {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-    } else {
-      localPose[(dst + 0u)] = res.x;
-      localPose[(dst + 1u)] = res.y;
-      localPose[(dst + 2u)] = res.z;
-      localPose[(dst + 3u)] = res.w;
-    }
+    return bk_sq_makima(vn0, vn1, vm1, vn2, vm2, vn3, w, bk_df_sub(tn1, tn0), bk_df_sub(tm1, tn0), bk_df_sub(tn2, tn0), bk_df_sub(tm2, tn0), bk_df_sub(tn3, tn0));
+  }
+}
+
+[shader("compute")] [numthreads(64, 1, 1)]
+void main(uint3 tid : SV_DispatchThreadID) {
+  uint i = tid.x;
+  if ((i >= params.T)) {
     return;
+  }
+  uint dst = trackDst[i];
+  uint flags = trackKind[i];
+  float4 res = bk_sample(i, float2(params.time, params.timeLo), float2(params.length, params.lengthLo), params.loopMode, params.backward);
+  if (((flags & 1u) == 0u)) {
+    localPose[(dst + 0u)] = res.x;
+    localPose[(dst + 1u)] = res.y;
+    localPose[(dst + 2u)] = res.z;
+  } else {
+    localPose[(dst + 0u)] = res.x;
+    localPose[(dst + 1u)] = res.y;
+    localPose[(dst + 2u)] = res.z;
+    localPose[(dst + 3u)] = res.w;
   }
 }

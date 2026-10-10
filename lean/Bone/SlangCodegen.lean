@@ -1,5 +1,6 @@
 import Bone.SlangCodegen.Sample
 import Bone.SlangCodegen.Blend
+import Bone.SlangCodegen.RootMotion
 import Bone.SlangCodegen.Local
 import Bone.SlangCodegen.Jump
 import Bone.SlangCodegen.Skin
@@ -13,6 +14,7 @@ namespace Bone.SlangCodegen
 def kernels : List (String × LeanSlang.SlangShaderModule) :=
   [ ("bone_sample", Sample.shader)
   , ("bone_blend",  Blend.shader)
+  , ("root_motion", RootMotion.shader)
   , ("bone_local",  Local.shader)
   , ("bone_jump",   Jump.shader)
   , ("bone_skin",   Skin.shader) ]

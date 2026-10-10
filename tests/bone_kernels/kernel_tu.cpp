@@ -95,4 +95,26 @@ extern "C" void bone_blend_run(uint32_t N, uint32_t I, uint32_t deterministic, f
 	vi.endGroupID = uint3((N + 63u) / 64u, 1u, 1u);
 	main_0(&vi, nullptr, &g);
 }
+#elif BONE_KERNEL == 6
+#include "root_motion.cpu.cpp"
+extern "C" void root_motion_run(uint32_t I, uint32_t deterministic, uint32_t local, uint32_t *trackKeys, uint32_t *trackKind, float *keyTime,
+		float *keyVal, float *keyTrans, float *keyTimeLo, size_t K, uint32_t T, float *instF, uint32_t *instU, float *weight, float *out) {
+	RootMotionParams_0 p{ I, deterministic, local };
+	GlobalParams_0 g{};
+	g.params_0 = &p;
+	g.trackKeys_0.data = trackKeys; g.trackKeys_0.count = 2 * T;
+	g.trackKind_0.data = trackKind; g.trackKind_0.count = T;
+	g.keyTime_0.data = keyTime; g.keyTime_0.count = K;
+	g.keyVal_0.data = keyVal; g.keyVal_0.count = 4 * K;
+	g.keyTrans_0.data = keyTrans; g.keyTrans_0.count = K;
+	g.keyTimeLo_0.data = keyTimeLo; g.keyTimeLo_0.count = K;
+	g.instF_0.data = instF; g.instF_0.count = 10 * size_t(I);
+	g.instU_0.data = instU; g.instU_0.count = 6 * size_t(I);
+	g.weight_0.data = weight; g.weight_0.count = I;
+	g.rootMotion_0.data = out; g.rootMotion_0.count = 10;
+	ComputeVaryingInput vi{};
+	vi.startGroupID = uint3(0u, 0u, 0u);
+	vi.endGroupID = uint3(1u, 1u, 1u);
+	main_0(&vi, nullptr, &g);
+}
 #endif
