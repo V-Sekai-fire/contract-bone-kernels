@@ -17,8 +17,11 @@
 #include <string>
 #include <vector>
 
-extern "C" void bone_sample_run(uint32_t, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, size_t, float *, float *, float *,
-		size_t);
+extern "C" void bone_sample_run(uint32_t, float, float, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, float *, size_t,
+		float *, float *, float *, size_t);
+// A double time as float hi + lo (df32), as the hosts split the engine's doubles.
+static inline float df_hi(double x) { return float(x); }
+static inline float df_lo(double x) { return float(x - double(float(x))); }
 extern "C" void bone_local_run(uint32_t, uint32_t *, float *, float *, uint32_t *);
 extern "C" void bone_jump_run(uint32_t, float *, uint32_t *, float *, uint32_t *);
 extern "C" void bone_skin_run(uint32_t, uint32_t *, float *, float *, size_t, float *);
@@ -67,6 +70,7 @@ int main(int argc, char **argv) {
 	auto keyTime = load<float>(d + "/key_time.bin");
 	auto keyVal = load<float>(d + "/key_val.bin");
 	auto keyTrans = load<float>(d + "/key_trans.bin");
+	std::vector<float> keyTimeLo(keyTime.size(), 0.0f); // these fixtures store key times as float32 only
 	auto localPose = load<float>(d + "/local_pose.bin");
 	auto parent = load<uint32_t>(d + "/parent.bin");
 	auto bindBone = load<uint32_t>(d + "/bind_bone.bin");
@@ -74,8 +78,8 @@ int main(int argc, char **argv) {
 	auto expect = load<float>(d + "/expect_skin.bin");
 	std::vector<float> globalPose(12 * bones, 0.0f), skin(12 * size_t(B), 0.0f);
 
-	bone_sample_run(T, time, length, loop, 0, trackKeys.data(), trackDst.data(), trackKind.data(), keyTime.data(), keyTime.size(),
-			keyVal.data(), keyTrans.data(), localPose.data(), localPose.size());
+	bone_sample_run(T, time, 0.0f, length, 0.0f, loop, 0, trackKeys.data(), trackDst.data(), trackKind.data(), keyTime.data(), keyTimeLo.data(),
+			keyTime.size(), keyVal.data(), keyTrans.data(), localPose.data(), localPose.size());
 	// local matrices, then pointer-jumping rounds until no bone has an ancestor left
 	const uint32_t N = uint32_t(bones);
 	std::vector<float> acc2(12 * bones, 0.0f);

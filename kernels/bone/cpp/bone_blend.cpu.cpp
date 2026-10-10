@@ -4291,7 +4291,7 @@ struct BoneBlendParams_0
 };
 
 
-#line 283
+#line 369
 struct GlobalParams_0
 {
     BoneBlendParams_0* params_0;
@@ -4305,7 +4305,7 @@ struct GlobalParams_0
 };
 
 
-#line 283
+#line 369
 struct KernelContext_0
 {
     GlobalParams_0* globalParams_0;
@@ -4362,230 +4362,230 @@ static float length_0(Vector<float, 4>  x_1)
 }
 
 
-#line 91 "slang/bone_blend.slang"
+#line 146 "slang/bone_blend.slang"
 static Vector<float, 4>  bk_qinv_0(Vector<float, 4>  a_0)
 {
 
-#line 92
+#line 147
     return Vector<float, 4> (- a_0.x, - a_0.y, - a_0.z, a_0.w);
 }
 
 
-#line 87
+#line 142
 static Vector<float, 4>  bk_qmul_0(Vector<float, 4>  a_1, Vector<float, 4>  b_0)
 {
 
-#line 88
+#line 143
     float _S1 = a_1.w;
 
-#line 88
+#line 143
     float _S2 = b_0.x;
 
-#line 88
+#line 143
     float _S3 = a_1.x;
 
-#line 88
+#line 143
     float _S4 = b_0.w;
 
-#line 88
+#line 143
     float _S5 = a_1.y;
 
-#line 88
+#line 143
     float _S6 = b_0.z;
 
-#line 88
+#line 143
     float _S7 = a_1.z;
 
-#line 88
+#line 143
     float _S8 = b_0.y;
 
-#line 88
+#line 143
     return Vector<float, 4> (_S1 * _S2 + _S3 * _S4 + _S5 * _S6 - _S7 * _S8, _S1 * _S8 + _S5 * _S4 + _S7 * _S2 - _S3 * _S6, _S1 * _S6 + _S7 * _S4 + _S3 * _S8 - _S5 * _S2, _S1 * _S4 - _S3 * _S2 - _S5 * _S8 - _S7 * _S6);
 }
 
 
-#line 112
+#line 167
 static Vector<float, 4>  bk_slerp_0(Vector<float, 4>  a_2, Vector<float, 4>  b0_0, float w_0)
 {
     float c_0 = dot_0(a_2, b0_0);
 
-#line 114
+#line 169
     float c_1;
 
-#line 114
+#line 169
     Vector<float, 4>  b_1;
     if(c_0 < 0.0f)
     {
         Vector<float, 4>  _S9 = - b0_0;
 
-#line 117
+#line 172
         c_1 = - c_0;
 
-#line 117
+#line 172
         b_1 = _S9;
 
-#line 115
+#line 170
     }
     else
     {
 
-#line 115
+#line 170
         c_1 = c_0;
 
-#line 115
+#line 170
         b_1 = b0_0;
 
-#line 115
+#line 170
     }
 
 
 
     float _S10 = 1.0f - w_0;
 
-#line 119
+#line 174
     float s0_0;
 
-#line 119
+#line 174
     float s1_0;
 
     if((1.0f - c_1) > 0.00000999999974738f)
     {
 
-#line 122
+#line 177
         float om_0 = (F32_acos((c_1)));
         float si_0 = (F32_sin((om_0)));
 
         float _S11 = (F32_sin((w_0 * om_0))) / si_0;
 
-#line 125
+#line 180
         s0_0 = (F32_sin((_S10 * om_0))) / si_0;
 
-#line 125
+#line 180
         s1_0 = _S11;
 
-#line 121
+#line 176
     }
     else
     {
 
-#line 121
+#line 176
         s0_0 = _S10;
 
-#line 121
+#line 176
         s1_0 = w_0;
 
-#line 121
+#line 176
     }
 
-#line 127
+#line 182
     Vector<float, 4>  r_0 = a_2 * (Vector<float, 4> )s0_0 + b_1 * (Vector<float, 4> )s1_0;
     return r_0 / (Vector<float, 4> )(F32_max((length_0(r_0)), (9.99999968265522539e-21f)));
 }
 
 
-#line 233
+#line 319
 void _main_0(void* _S12, void* entryPointParams_0, void* globalParams_1)
 {
 
-#line 233
+#line 319
     ComputeThreadVaryingInput * _S13 = (slang_bit_cast<ComputeThreadVaryingInput *>(_S12));
 
-#line 233
+#line 319
     KernelContext_0 kernelContext_0;
 
-#line 233
+#line 319
     (&kernelContext_0)->globalParams_0 = (slang_bit_cast<GlobalParams_0*>(globalParams_1));
     uint32_t b_2 = (_S13->groupID * Vector<uint32_t, 3> (64U, 1U, 1U) + _S13->groupThreadID).x;
     if(b_2 >= ((slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->N_0))
     {
 
-#line 236
+#line 322
         return;
     }
     bool det_0 = ((slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->deterministic_0) != 0U;
 
-#line 238
+#line 324
     float total_0 = 0.0f;
 
-#line 238
+#line 324
     uint32_t i_1 = 0U;
 
     for(;;)
     {
 
-#line 240
+#line 326
         if(i_1 < ((slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->I_0))
         {
         }
         else
         {
 
-#line 240
+#line 326
             break;
         }
 
-#line 241
+#line 327
         if((((&kernelContext_0)->globalParams_0->present_0).Load(i_1 * (slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->N_0 + b_2) & 8U) != 0U)
         {
 
-#line 241
+#line 327
             total_0 = total_0 + (&kernelContext_0)->globalParams_0->weight_0.Load(i_1 * (slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->N_0 + b_2);
 
-#line 241
+#line 327
         }
 
-#line 240
+#line 326
         i_1 = i_1 + 1U;
 
-#line 240
+#line 326
     }
 
-#line 245
+#line 331
     bool _S14 = !det_0;
 
-#line 245
+#line 331
     bool _S15;
 
-#line 245
+#line 331
     if(_S14)
     {
 
-#line 245
+#line 331
         _S15 = (F32_abs((total_0))) < 0.00000999999974738f;
 
-#line 245
+#line 331
     }
     else
     {
 
-#line 245
+#line 331
         _S15 = false;
 
-#line 245
+#line 331
     }
 
-#line 245
+#line 331
     if(_S15)
     {
 
-#line 246
+#line 332
         return;
     }
     uint32_t ib_0 = b_2 * 10U;
     uint32_t _S16 = ib_0 + 1U;
 
-#line 249
+#line 335
     uint32_t _S17 = ib_0 + 2U;
 
-#line 249
+#line 335
     Vector<float, 3>  iLoc_0 = Vector<float, 3> ((&kernelContext_0)->globalParams_0->init_0.Load(ib_0), (&kernelContext_0)->globalParams_0->init_0.Load(_S16), (&kernelContext_0)->globalParams_0->init_0.Load(_S17));
     uint32_t _S18 = ib_0 + 3U;
 
-#line 250
+#line 336
     Vector<float, 4>  iRot_0 = Vector<float, 4> ((&kernelContext_0)->globalParams_0->init_0.Load(_S18), (&kernelContext_0)->globalParams_0->init_0.Load(_S18 + 1U), (&kernelContext_0)->globalParams_0->init_0.Load(_S18 + 2U), (&kernelContext_0)->globalParams_0->init_0.Load(_S18 + 3U));
     uint32_t _S19 = ib_0 + 7U;
 
-#line 251
+#line 337
     Vector<float, 3>  iSc_0 = Vector<float, 3> ((&kernelContext_0)->globalParams_0->init_0.Load(_S19), (&kernelContext_0)->globalParams_0->init_0.Load(_S19 + 1U), (&kernelContext_0)->globalParams_0->init_0.Load(_S19 + 2U));
     Vector<float, 4>  _S20 = bk_qinv_0(iRot_0);
 
@@ -4593,225 +4593,225 @@ void _main_0(void* _S12, void* entryPointParams_0, void* globalParams_1)
 
     float _S21 = (&kernelContext_0)->globalParams_0->motionScale_0.Load(b_2);
 
-#line 256
+#line 342
     Vector<float, 3>  loc_0 = iLoc_0;
 
-#line 256
+#line 342
     Vector<float, 4>  rot_0 = iRot_0;
 
-#line 256
+#line 342
     Vector<float, 3>  sc_0 = iSc_0;
 
-#line 256
+#line 342
     i_1 = 0U;
     for(;;)
     {
 
-#line 257
+#line 343
         if(i_1 < ((slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->I_0))
         {
         }
         else
         {
 
-#line 257
+#line 343
             break;
         }
 
-#line 258
+#line 344
         uint32_t k_0 = i_1 * (slang_bit_cast<GlobalParams_0*>(globalParams_1))->params_0->N_0 + b_2;
         uint32_t m_0 = (&kernelContext_0)->globalParams_0->present_0.Load(k_0);
 
-#line 259
+#line 345
         Vector<float, 3>  loc_1;
 
-#line 259
+#line 345
         Vector<float, 3>  sc_1;
 
-#line 259
+#line 345
         Vector<float, 4>  rot_1;
         if((m_0 & 8U) != 0U)
         {
 
-#line 261
+#line 347
             float bl_0 = (&kernelContext_0)->globalParams_0->weight_0.Load(k_0);
 
-#line 261
+#line 347
             float bl_1;
             if(_S14)
             {
 
-#line 262
+#line 348
                 bl_1 = bl_0 / total_0;
 
-#line 262
+#line 348
             }
             else
             {
 
-#line 262
+#line 348
                 bl_1 = bl_0;
 
-#line 262
+#line 348
             }
 
 
             if((F32_abs((bl_1))) >= 0.00000999999974738f)
             {
 
-#line 266
+#line 352
                 uint32_t o_0 = k_0 * 10U;
                 if((m_0 & 1U) != 0U)
                 {
 
-#line 267
+#line 353
                     loc_1 = loc_0 + (Vector<float, 3> ((&kernelContext_0)->globalParams_0->samp_0.Load(o_0), (&kernelContext_0)->globalParams_0->samp_0.Load(o_0 + 1U), (&kernelContext_0)->globalParams_0->samp_0.Load(o_0 + 2U)) * (Vector<float, 3> )_S21 - iLoc_0) * (Vector<float, 3> )bl_1;
 
-#line 267
+#line 353
                 }
                 else
                 {
 
-#line 267
+#line 353
                     loc_1 = loc_0;
 
-#line 267
+#line 353
                 }
 
 
                 if((m_0 & 2U) != 0U)
                 {
 
-#line 271
+#line 357
                     uint32_t _S22 = o_0 + 3U;
                     Vector<float, 4>  r_1 = bk_qmul_0(rot_0, bk_slerp_0(Vector<float, 4> (0.0f, 0.0f, 0.0f, 1.0f), bk_qmul_0(_S20, Vector<float, 4> ((&kernelContext_0)->globalParams_0->samp_0.Load(_S22), (&kernelContext_0)->globalParams_0->samp_0.Load(_S22 + 1U), (&kernelContext_0)->globalParams_0->samp_0.Load(_S22 + 2U), (&kernelContext_0)->globalParams_0->samp_0.Load(_S22 + 3U))), bl_1));
 
-#line 272
+#line 358
                     rot_1 = r_1 / (Vector<float, 4> )(F32_max((length_0(r_1)), (9.99999968265522539e-21f)));
 
-#line 270
+#line 356
                 }
                 else
                 {
 
-#line 270
+#line 356
                     rot_1 = rot_0;
 
-#line 270
+#line 356
                 }
 
-#line 275
+#line 361
                 if((m_0 & 4U) != 0U)
                 {
 
-#line 276
+#line 362
                     uint32_t _S23 = o_0 + 7U;
 
-#line 276
+#line 362
                     sc_1 = sc_0 + (Vector<float, 3> ((&kernelContext_0)->globalParams_0->samp_0.Load(_S23), (&kernelContext_0)->globalParams_0->samp_0.Load(_S23 + 1U), (&kernelContext_0)->globalParams_0->samp_0.Load(_S23 + 2U)) - iSc_0) * (Vector<float, 3> )bl_1;
 
-#line 275
+#line 361
                 }
                 else
                 {
 
-#line 275
+#line 361
                     sc_1 = sc_0;
 
-#line 275
+#line 361
                 }
 
-#line 265
+#line 351
             }
             else
             {
 
-#line 265
+#line 351
                 loc_1 = loc_0;
 
-#line 265
+#line 351
                 rot_1 = rot_0;
 
-#line 265
+#line 351
                 sc_1 = sc_0;
 
-#line 265
+#line 351
             }
 
-#line 260
+#line 346
         }
         else
         {
 
-#line 260
+#line 346
             loc_1 = loc_0;
 
-#line 260
+#line 346
             rot_1 = rot_0;
 
-#line 260
+#line 346
             sc_1 = sc_0;
 
-#line 260
+#line 346
         }
 
-#line 257
+#line 343
         uint32_t i_2 = i_1 + 1U;
 
-#line 257
+#line 343
         loc_0 = loc_1;
 
-#line 257
+#line 343
         rot_0 = rot_1;
 
-#line 257
+#line 343
         sc_0 = sc_1;
 
-#line 257
+#line 343
         i_1 = i_2;
 
-#line 257
+#line 343
     }
 
-#line 281
+#line 367
     uint32_t us_0 = (&kernelContext_0)->globalParams_0->used_0.Load(b_2);
     if((us_0 & 1U) != 0U)
     {
 
-#line 283
+#line 369
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0]) = loc_0.x;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[_S16]) = loc_0.y;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[_S17]) = loc_0.z;
 
-#line 282
+#line 368
     }
 
-#line 287
+#line 373
     if((us_0 & 2U) != 0U)
     {
 
-#line 288
+#line 374
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[_S18]) = rot_0.x;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0 + 4U]) = rot_0.y;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0 + 5U]) = rot_0.z;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0 + 6U]) = rot_0.w;
 
-#line 287
+#line 373
     }
 
-#line 293
+#line 379
     if((us_0 & 4U) != 0U)
     {
 
-#line 294
+#line 380
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[_S19]) = sc_0.x;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0 + 8U]) = sc_0.y;
         *(&((&kernelContext_0)->globalParams_0->localPose_0)[ib_0 + 9U]) = sc_0.z;
 
-#line 293
+#line 379
     }
 
-#line 298
+#line 384
     return;
 }
 

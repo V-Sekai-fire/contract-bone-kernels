@@ -8,6 +8,10 @@
 #   Lean (lean/, `lake exe emit_bone`)  ->  slang/<k>.slang       (committed)
 #     slangc -target cpp                ->  cpp/<k>.cpu.cpp       (committed, the server path)
 #     slangc -target spirv              ->  spv/<k>.spv           (committed, the GPU path)
+#
+# Both targets compile with -fp-mode precise. The df32 time arithmetic (Curves.lean) needs the
+# compiler not to reassociate or fuse float operations; `precise` on its locals alone was not enough
+# for the GPU path (makima drifted by ~3e-2 against the engine until the whole module was precise).
 set -euo pipefail
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +32,7 @@ fi
 mkdir -p "$HERE/cpp" "$HERE/spv"
 cd "$HERE"
 for k in $KERNELS; do
-	"$SLANGC" "slang/$k.slang" -target cpp -stage compute -entry main -o "cpp/$k.cpu.cpp"
-	"$SLANGC" "slang/$k.slang" -target spirv -stage compute -entry main -o "spv/$k.spv"
+	"$SLANGC" "slang/$k.slang" -target cpp -stage compute -entry main -fp-mode precise -o "cpp/$k.cpu.cpp"
+	"$SLANGC" "slang/$k.slang" -target spirv -stage compute -entry main -fp-mode precise -o "spv/$k.spv"
 	echo "$k: cpp $(wc -c < cpp/$k.cpu.cpp | tr -d ' ') B, spirv $(wc -c < spv/$k.spv | tr -d ' ') B"
 done

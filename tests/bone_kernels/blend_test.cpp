@@ -18,8 +18,11 @@
 #include <string>
 #include <vector>
 
-extern "C" void bone_sample_run(uint32_t, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, size_t, float *, float *, float *,
-		size_t);
+extern "C" void bone_sample_run(uint32_t, float, float, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, float *, size_t,
+		float *, float *, float *, size_t);
+// A double time as float hi + lo (df32), as the hosts split the engine's doubles.
+static inline float df_hi(double x) { return float(x); }
+static inline float df_lo(double x) { return float(x - double(float(x))); }
 extern "C" void bone_blend_run(uint32_t, uint32_t, uint32_t, float *, uint32_t *, float *, float *, float *, uint32_t *, float *);
 
 template <class T>
@@ -55,7 +58,7 @@ static std::vector<double> list(const std::string &json, const std::string &key)
 
 struct Clip {
 	std::vector<uint32_t> keys, dst, kind;
-	std::vector<float> time, val, trans;
+	std::vector<float> time, val, trans, timeLo;
 };
 
 int main(int argc, char **argv) {
@@ -94,7 +97,7 @@ int main(int argc, char **argv) {
 	for (uint32_t c = 0; c < I; c++) {
 		const std::string p = d + "/clip" + std::to_string(c) + "_";
 		clips[c] = { load<uint32_t>(p + "track_keys.bin"), load<uint32_t>(p + "track_dst.bin"), load<uint32_t>(p + "track_kind.bin"),
-			load<float>(p + "key_time.bin"), load<float>(p + "key_val.bin"), load<float>(p + "key_trans.bin") };
+			load<float>(p + "key_time.bin"), load<float>(p + "key_val.bin"), load<float>(p + "key_trans.bin"), load<float>(p + "key_time_lo.bin") };
 	}
 	auto present = load<uint32_t>(d + "/present.bin");
 	auto init = load<float>(d + "/init.bin");
@@ -112,8 +115,8 @@ int main(int argc, char **argv) {
 			Clip &k = clips[c];
 			const uint32_t T = uint32_t(k.dst.size());
 			if (T > 0) {
-				bone_sample_run(T, float(ftimes[f][c]), float(lengths[c]), uint32_t(loops[c]), 0, k.keys.data(), k.dst.data(), k.kind.data(),
-						k.time.data(), k.time.size(), k.val.data(), k.trans.data(), samp.data(), samp.size());
+				bone_sample_run(T, df_hi(ftimes[f][c]), df_lo(ftimes[f][c]), df_hi(lengths[c]), df_lo(lengths[c]), uint32_t(loops[c]), 0, k.keys.data(),
+						k.dst.data(), k.kind.data(), k.time.data(), k.timeLo.data(), k.time.size(), k.val.data(), k.trans.data(), samp.data(), samp.size());
 			}
 		}
 		std::vector<float> w(weight.begin() + f * I * N, weight.begin() + (f + 1) * I * N);
