@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: If you use these kernels, cite the engine whose animation semantics they restate.
+title: Bone kernels (Lean-emitted)
+abstract: >-
+  lean/Bone/SlangCodegen/*.lean restate the per-frame work of the engine's clip
+  player and skeleton as LeanSlang compute kernels on the drape kernels' layout
+  (a params block at binding 0, flat buffers): keyframe sampling with the
+  engine's Quaternion::slerp and its linear loop-mode wrap (bone_sample), the
+  local pose matrix with Basis::set_quaternion_scale (bone_local), the
+  skeleton-space pose by pointer jumping over the parent links, one round per
+  dispatch and ceil(log2(depth + 1)) rounds for any tree shape (bone_jump), and
+  the bind-pose product in the skeleton buffer's 3x4 row layout (bone_skin).
+  lake exe emit_bone writes them as Slang into slang/, and gen.sh compiles them
+  to cpp/ (servers) and spv/ (GPU clients). No engine source is copied.
+  Verified against the engine's own CPU clip player and skeleton by
+  tests/bone_kernels (C++ emission; fan, chain and random-parent fixtures) and
+  by GPU runs of the bytecode on the engine's local rendering device.
+type: software
+authors:
+  - name: K. S. Ernest (iFire) Lee
+  - name: V-Sekai
+repository-code: https://github.com/V-Sekai-fire/contract-bone-kernels
+license: MIT

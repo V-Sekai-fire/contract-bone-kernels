@@ -1,0 +1,10 @@
+{
+ "binds": 4096,
+ "bones": 4096,
+ "depth": 16,
+ "length": 4.0,
+ "loop": 1,
+ "source": "engine CPU clip player + skeleton; random skeleton of 4096 bones, depth 16; rotation track on every non-root bone, position on every 5th, non-uniform scale on every 7th",
+ "time": 1.9,
+ "tracks": 5495
+}

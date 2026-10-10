@@ -1,0 +1,10 @@
+{
+ "binds": 512,
+ "bones": 512,
+ "depth": 511,
+ "length": 4.0,
+ "loop": 1,
+ "source": "engine CPU clip player + skeleton; chain skeleton of 512 bones, depth 511; rotation track on every non-root bone, position on every 5th, non-uniform scale on every 7th",
+ "time": 1.9,
+ "tracks": 686
+}

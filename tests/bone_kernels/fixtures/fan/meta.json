@@ -1,0 +1,10 @@
+{
+ "binds": 201,
+ "bones": 201,
+ "length": 4.0,
+ "loop": 1,
+ "source": "engine CPU clip player + skeleton, one shared root per skeleton, 200 copies",
+ "time": 1.9,
+ "tracks": 200,
+ "depth": 1
+}
