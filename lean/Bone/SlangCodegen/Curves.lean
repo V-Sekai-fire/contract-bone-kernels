@@ -41,6 +41,67 @@ def fn (ret : SlangType) (name : String) (ps : List (String × SlangType)) (body
 
 private def fs (ns : List String) : List (String × SlangType) := ns.map (·, fT)
 
+def f2T : SlangType := .vec .float 2
+/-- A `precise` local: no contraction into fused multiply-add, which df32 needs. -/
+def pl (ty : SlangType) (n : String) (e : E) : St := .declarePrecise ty n (some e)
+def f2 (a b : E) : E := call "float2" [a, b]
+
+/-! ### df32: a time as a float pair `hi + lo`
+
+Key times, the clip time and the clip length are carried as df32 pairs, and
+every difference of times is taken in df32 before it is rounded to one float.
+The engine keeps key times in double; with keys a millisecond apart the cubic
+and makima curves extrapolate by hundreds, which turns float32 rounding of the
+times into visible error. -/
+
+/-- Error-free sum (Knuth): `a + b = s + e` exactly. -/
+def twoSum : SlangFunctionDecl :=
+  fn f2T "bk_two_sum" (fs ["a", "b"])
+    [ pl fT "s" (v "a" + v "b"), pl fT "bb" (v "s" - v "a")
+    , pl fT "e" ((v "a" - (v "s" - v "bb")) + (v "b" - v "bb"))
+    , retE (f2 (v "s") (v "e")) ]
+
+/-- Dekker split of a float into two 12-bit halves. -/
+def split : SlangFunctionDecl :=
+  fn f2T "bk_split" (fs ["a"])
+    [ pl fT "c" (fl 4097.0 * v "a"), pl fT "hi" (v "c" - (v "c" - v "a")), pl fT "lo" (v "a" - v "hi")
+    , retE (f2 (v "hi") (v "lo")) ]
+
+/-- Error-free product (Dekker): `a · b = p + e` exactly. -/
+def twoProd : SlangFunctionDecl :=
+  fn f2T "bk_two_prod" (fs ["a", "b"])
+    [ pl fT "pr" (v "a" * v "b"), pl f2T "sa" (call "bk_split" [v "a"]), pl f2T "sb" (call "bk_split" [v "b"])
+    , pl fT "e" (((mem (v "sa") "x" * mem (v "sb") "x" - v "pr") + mem (v "sa") "x" * mem (v "sb") "y" + mem (v "sa") "y" * mem (v "sb") "x")
+        + mem (v "sa") "y" * mem (v "sb") "y")
+    , retE (f2 (v "pr") (v "e")) ]
+
+/-- df32 + df32. -/
+def dfAdd : SlangFunctionDecl :=
+  fn f2T "bk_df_add" [("a", f2T), ("b", f2T)]
+    [ pl f2T "s" (call "bk_two_sum" [mem (v "a") "x", mem (v "b") "x"])
+    , pl fT "e" (mem (v "s") "y" + mem (v "a") "y" + mem (v "b") "y")
+    , pl fT "h" (mem (v "s") "x" + v "e"), pl fT "l" (v "e" - (v "h" - mem (v "s") "x"))
+    , retE (f2 (v "h") (v "l")) ]
+
+/-- df32 − df32. -/
+def dfSub : SlangFunctionDecl :=
+  fn f2T "bk_df_sub" [("a", f2T), ("b", f2T)]
+    [ retE (call "bk_df_add" [v "a", .un "-" (v "b")]) ]
+
+/-- df32 × float. -/
+def dfMulF : SlangFunctionDecl :=
+  fn f2T "bk_df_mulf" [("a", f2T), ("b", fT)]
+    [ pl f2T "pr" (call "bk_two_prod" [mem (v "a") "x", v "b"])
+    , pl fT "e" (mem (v "pr") "y" + mem (v "a") "y" * v "b")
+    , pl fT "h" (mem (v "pr") "x" + v "e"), pl fT "l" (v "e" - (v "h" - mem (v "pr") "x"))
+    , retE (f2 (v "h") (v "l")) ]
+
+/-- A df32 rounded to one float. -/
+def dfv (a : E) : E := mem a "x" + mem a "y"
+/-- `a − b` in df32, rounded to one float. -/
+def dfd (a b : E) : E := dfv (call "bk_df_sub" [a, b])
+
+
 /-- `Math::ease(x, c)`. -/
 def ease : SlangFunctionDecl :=
   fn fT "bk_ease" (fs ["x0", "c"])
@@ -57,16 +118,20 @@ def ease : SlangFunctionDecl :=
 
 private def lerpE (a b w : E) : E := a + w * (b - a)
 
-/-- `Math::cubic_interpolate_in_time(from, to, pre, post, w, toT, preT, postT)`. -/
+/-- `Math::cubic_interpolate_in_time(from, to, pre, post, w, toT, preT, postT)`; the
+times are df32 offsets from the `from` key, and every time difference is df32. -/
 def cubic : SlangFunctionDecl :=
-  fn fT "bk_cubic" (fs ["from", "to", "pre", "post", "w", "toT", "preT", "postT"])
-    [ let_ fT "t" (lerpE (fl 0.0) (v "toT") (v "w"))
-    , let_ fT "a1" (lerpE (v "pre") (v "from") (sel (eq (v "preT") (fl 0.0)) (fl 0.0) ((v "t" - v "preT") / .un "-" (v "preT"))))
-    , let_ fT "a2" (lerpE (v "from") (v "to") (sel (eq (v "toT") (fl 0.0)) (fl 0.5) (v "t" / v "toT")))
-    , let_ fT "a3" (lerpE (v "to") (v "post") (sel (eq (v "postT" - v "toT") (fl 0.0)) (fl 1.0) ((v "t" - v "toT") / (v "postT" - v "toT"))))
-    , let_ fT "b1" (lerpE (v "a1") (v "a2") (sel (eq (v "toT" - v "preT") (fl 0.0)) (fl 0.0) ((v "t" - v "preT") / (v "toT" - v "preT"))))
-    , let_ fT "b2" (lerpE (v "a2") (v "a3") (sel (eq (v "postT") (fl 0.0)) (fl 1.0) (v "t" / v "postT")))
-    , retE (lerpE (v "b1") (v "b2") (sel (eq (v "toT") (fl 0.0)) (fl 0.5) (v "t" / v "toT"))) ]
+  fn fT "bk_cubic" (fs ["from", "to", "pre", "post", "w"] ++ [("toT", f2T), ("preT", f2T), ("postT", f2T)])
+    [ pl f2T "t" (call "bk_df_mulf" [v "toT", v "w"])
+    , let_ fT "fTo" (dfv (v "toT")), let_ fT "fPre" (dfv (v "preT")), let_ fT "fPost" (dfv (v "postT"))
+    , let_ fT "dPostTo" (dfd (v "postT") (v "toT")), let_ fT "dToPre" (dfd (v "toT") (v "preT"))
+    , let_ fT "tPre" (dfd (v "t") (v "preT")), let_ fT "tTo" (dfd (v "t") (v "toT")), let_ fT "tt" (dfv (v "t"))
+    , let_ fT "a1" (lerpE (v "pre") (v "from") (sel (eq (v "fPre") (fl 0.0)) (fl 0.0) (v "tPre" / .un "-" (v "fPre"))))
+    , let_ fT "a2" (lerpE (v "from") (v "to") (sel (eq (v "fTo") (fl 0.0)) (fl 0.5) (v "tt" / v "fTo")))
+    , let_ fT "a3" (lerpE (v "to") (v "post") (sel (eq (v "dPostTo") (fl 0.0)) (fl 1.0) (v "tTo" / v "dPostTo")))
+    , let_ fT "b1" (lerpE (v "a1") (v "a2") (sel (eq (v "dToPre") (fl 0.0)) (fl 0.0) (v "tPre" / v "dToPre")))
+    , let_ fT "b2" (lerpE (v "a2") (v "a3") (sel (eq (v "fPost") (fl 0.0)) (fl 1.0) (v "tt" / v "fPost")))
+    , retE (lerpE (v "b1") (v "b2") (sel (eq (v "fTo") (fl 0.0)) (fl 0.5) (v "tt" / v "fTo"))) ]
 
 /-- `Animation::makima_tangent(p0, p1, p2, p3)`. -/
 def makimaTan : SlangFunctionDecl :=
@@ -76,30 +141,34 @@ def makimaTan : SlangFunctionDecl :=
     , if_ (eq (v "w1" + v "w2") (fl 0.0)) [ retE ((v "p1" + v "p2") * fl 0.5) ]
     , retE ((v "w1" * v "p1" + v "w2" * v "p2") / (v "w1" + v "w2")) ]
 
-/-- `Animation::makima_interpolate_in_time(from, to, pre, post, pp, qq, w, toT, preT, postT, ppT, qqT)`. -/
+/-- `Animation::makima_interpolate_in_time(from, to, pre, post, pp, qq, w, toT, preT, postT, ppT, qqT)`;
+times are df32 offsets from the `from` key, differences in df32. -/
 def makima : SlangFunctionDecl :=
   let ex (e n : E) : E := fl 2.0 * e - n
-  fn fT "bk_makima" (fs ["from", "to", "pre", "post", "pp", "qq", "w", "toT", "preT", "postT", "ppT", "qqT"])
-    [ let_ bT "cTo" (eq (v "toT") (fl 0.0))
-    , let_ bT "cPre" (eq (v "preT") (fl 0.0))
-    , let_ bT "cPost" (eq (v "postT" - v "toT") (fl 0.0))
-    , let_ bT "cPp" (eq (v "preT" - v "ppT") (fl 0.0))
-    , let_ bT "cQq" (eq (v "qqT" - v "postT") (fl 0.0))
-    , let_ fT "mFrom" (sel (v "cTo") (fl 0.0) ((v "to" - v "from") / v "toT"))
-    , let_ fT "mPre" (sel (v "cPre") (fl 0.0) ((v "from" - v "pre") / .un "-" (v "preT")))
-    , let_ fT "mPost" (sel (v "cPost") (fl 0.0) ((v "post" - v "to") / (v "postT" - v "toT")))
+  fn fT "bk_makima" (fs ["from", "to", "pre", "post", "pp", "qq", "w"] ++
+      [("toT", f2T), ("preT", f2T), ("postT", f2T), ("ppT", f2T), ("qqT", f2T)])
+    [ let_ fT "fTo" (dfv (v "toT")), let_ fT "fPre" (dfv (v "preT"))
+    , let_ fT "dPost" (dfd (v "postT") (v "toT")), let_ fT "dPp" (dfd (v "preT") (v "ppT")), let_ fT "dQq" (dfd (v "qqT") (v "postT"))
+    , let_ bT "cTo" (eq (v "fTo") (fl 0.0))
+    , let_ bT "cPre" (eq (v "fPre") (fl 0.0))
+    , let_ bT "cPost" (eq (v "dPost") (fl 0.0))
+    , let_ bT "cPp" (eq (v "dPp") (fl 0.0))
+    , let_ bT "cQq" (eq (v "dQq") (fl 0.0))
+    , let_ fT "mFrom" (sel (v "cTo") (fl 0.0) ((v "to" - v "from") / v "fTo"))
+    , let_ fT "mPre" (sel (v "cPre") (fl 0.0) ((v "from" - v "pre") / .un "-" (v "fPre")))
+    , let_ fT "mPost" (sel (v "cPost") (fl 0.0) ((v "post" - v "to") / v "dPost"))
     , if_ (v "cPre") [ setv "mPre" (sel (v "cPost") (v "mFrom") (ex (v "mFrom") (v "mPost"))) ]
     , if_ (v "cPost") [ setv "mPost" (sel (v "cPre") (v "mFrom") (ex (v "mFrom") (v "mPre"))) ]
-    , let_ fT "mPp" (sel (v "cPp") (ex (v "mPre") (v "mFrom")) ((v "pre" - v "pp") / (v "preT" - v "ppT")))
-    , let_ fT "mQq" (sel (v "cQq") (ex (v "mPost") (v "mFrom")) ((v "qq" - v "post") / (v "qqT" - v "postT")))
+    , let_ fT "mPp" (sel (v "cPp") (ex (v "mPre") (v "mFrom")) ((v "pre" - v "pp") / v "dPp"))
+    , let_ fT "mQq" (sel (v "cQq") (ex (v "mPost") (v "mFrom")) ((v "qq" - v "post") / v "dQq"))
     , let_ fT "tFrom" (call "bk_makima_tan" [v "mPp", v "mPre", v "mFrom", v "mPost"])
     , let_ fT "tTo" (call "bk_makima_tan" [v "mPre", v "mFrom", v "mPost", v "mQq"])
     , let_ fT "s2" (v "w" * v "w")
     , let_ fT "s3" (v "s2" * v "w")
     , retE ((fl 2.0 * v "s3" - fl 3.0 * v "s2" + fl 1.0) * v "from" +
-            (v "s3" - fl 2.0 * v "s2" + v "w") * v "toT" * v "tFrom" +
+            (v "s3" - fl 2.0 * v "s2" + v "w") * v "fTo" * v "tFrom" +
             (fl (-2.0) * v "s3" + fl 3.0 * v "s2") * v "to" +
-            (v "s3" - v "s2") * v "toT" * v "tTo") ]
+            (v "s3" - v "s2") * v "fTo" * v "tTo") ]
 
 private def q (n : String) (c : String) : E := mem (v n) c
 
@@ -195,7 +264,7 @@ def sqCubic : SlangFunctionDecl :=
   let side (out frm tt pre post : String) : St :=
     let_ f3T out (call "float3" (comps.map fun c =>
       call "bk_cubic" [mem (v frm) c, mem (v tt) c, mem (v pre) c, mem (v post) c, v "w", v "toT", v "preT", v "postT"]))
-  fn f4T "bk_sq_cubic" [("a", f4T), ("b0", f4T), ("pa0", f4T), ("pb0", f4T), ("w", fT), ("toT", fT), ("preT", fT), ("postT", fT)]
+  fn f4T "bk_sq_cubic" [("a", f4T), ("b0", f4T), ("pa0", f4T), ("pb0", f4T), ("w", fT), ("toT", f2T), ("preT", f2T), ("postT", f2T)]
     ([ let_ f4T "pa" (v "pa0"), let_ f4T "b" (v "b0"), let_ f4T "pb" (v "pb0") ] ++
      flipTo "pa" "a" none ++ flipTo "b" "a" none ++ flipTo "pb" "b" (some "f_b") ++
      [ let_ f3T "z0" (call "float3" [fl 0.0, fl 0.0, fl 0.0])
@@ -212,7 +281,7 @@ def sqMakima : SlangFunctionDecl :=
       call "bk_makima" [mem (v frm) c, mem (v tt) c, mem (v pre) c, mem (v post) c, mem (v pp) c, mem (v qq) c,
         v "w", v "toT", v "preT", v "postT", v "ppT", v "qqT"]))
   fn f4T "bk_sq_makima" [("a", f4T), ("b0", f4T), ("pa0", f4T), ("pb0", f4T), ("pp0", f4T), ("qq0", f4T),
-      ("w", fT), ("toT", fT), ("preT", fT), ("postT", fT), ("ppT", fT), ("qqT", fT)]
+      ("w", fT), ("toT", f2T), ("preT", f2T), ("postT", f2T), ("ppT", f2T), ("qqT", f2T)]
     ([ let_ f4T "pa" (v "pa0"), let_ f4T "b" (v "b0"), let_ f4T "pb" (v "pb0"),
        let_ f4T "pp" (v "pp0"), let_ f4T "qq" (v "qq0") ] ++
      flipTo "pa" "a" none ++ flipTo "pp" "pa" (some "f_pa") ++
@@ -228,8 +297,50 @@ def sqMakima : SlangFunctionDecl :=
      , side "toLn" "bFrom" "z0" "bPre" "bPost" "bPp" "bQq"
      , retE (call "bk_blend_log" [v "a", v "fromLn", v "toLn", v "aTo", v "w"]) ])
 
+private def tau : E := .litFloatExact 6.283185307179586
+
+/-- `Math::fposmod(x, y)`. -/
+def fposmod : SlangFunctionDecl :=
+  fn fT "bk_fposmod" (fs ["x", "y"])
+    [ let_ fT "r" (call "fmod" [v "x", v "y"])
+    , if_ (or_ (and_ (lt (v "r") (fl 0.0)) (gt (v "y") (fl 0.0))) (and_ (gt (v "r") (fl 0.0)) (lt (v "y") (fl 0.0))))
+        [ setv "r" (v "r" + v "y") ]
+    , retE (v "r") ]
+
+/-- `Math::angle_difference(from, to)`. -/
+def angleDiff : SlangFunctionDecl :=
+  fn fT "bk_angle_diff" (fs ["from", "to"])
+    [ let_ fT "d" (call "fmod" [v "to" - v "from", tau])
+    , retE (call "fmod" [fl 2.0 * v "d", tau] - v "d") ]
+
+/-- `Math::cubic_interpolate_angle_in_time`. -/
+def cubicAngle : SlangFunctionDecl :=
+  let unwrap (out x ref : String) : St :=
+    let_ fT out (v ref + call "fmod" [fl 2.0 * call "fmod" [v x - v ref, tau], tau] - call "fmod" [v x - v ref, tau])
+  fn fT "bk_cubic_angle" (fs ["from", "to", "pre", "post", "w"] ++ [("toT", f2T), ("preT", f2T), ("postT", f2T)])
+    [ let_ fT "fr" (call "fmod" [v "from", tau])
+    , unwrap "pr" "pre" "fr"
+    , unwrap "tr" "to" "fr"
+    , unwrap "po" "post" "tr"
+    , retE (call "bk_cubic" [v "fr", v "tr", v "pr", v "po", v "w", v "toT", v "preT", v "postT"]) ]
+
+/-- `Animation::makima_interpolate_angle_in_time`. -/
+def makimaAngle : SlangFunctionDecl :=
+  let unwrap (out x ref : String) : St :=
+    let_ fT out (v ref + call "fmod" [fl 2.0 * call "fmod" [v x - v ref, tau], tau] - call "fmod" [v x - v ref, tau])
+  fn fT "bk_makima_angle" (fs ["from", "to", "pre", "post", "pp", "qq", "w"] ++
+      [("toT", f2T), ("preT", f2T), ("postT", f2T), ("ppT", f2T), ("qqT", f2T)])
+    [ let_ fT "fr" (call "fmod" [v "from", tau])
+    , unwrap "pr" "pre" "fr"
+    , unwrap "ppr" "pp" "pr"
+    , unwrap "tr" "to" "fr"
+    , unwrap "po" "post" "tr"
+    , unwrap "qqr" "qq" "po"
+    , retE (call "bk_makima" [v "fr", v "tr", v "pr", v "po", v "ppr", v "qqr", v "w", v "toT", v "preT", v "postT", v "ppT", v "qqT"]) ]
+
 /-- Every helper, callees before callers. -/
 def all : List SlangFunctionDecl :=
-  [ ease, cubic, makimaTan, makima, qmul, qinv, qlog, qexp, slerp, nearestLog, blendLog, sqCubic, sqMakima ]
+  [ twoSum, split, twoProd, dfAdd, dfSub, dfMulF, ease, cubic, makimaTan, makima, qmul, qinv, qlog, qexp, slerp, nearestLog, blendLog, sqCubic, sqMakima,
+    fposmod, angleDiff, cubicAngle, makimaAngle ]
 
 end Bone.SlangCodegen.Curves

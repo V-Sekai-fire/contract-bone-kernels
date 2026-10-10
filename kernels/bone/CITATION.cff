@@ -7,6 +7,10 @@ abstract: >-
   (a params block at binding 0, flat buffers): keyframe sampling with the
   engine's Animation track samplers: all interpolation modes, loop modes,
   transitions and backward nearest keys (bone_sample, with Curves.lean), the
+  mixer's per-bone blend of several instances with filter weights,
+  deterministic or normalised weighting and Animation::interpolate_via_rest
+  (bone_blend), the root-motion arms of _blend_process and _blend_apply
+  (root_motion), the
   local pose matrix with Basis::set_quaternion_scale (bone_local), the
   skeleton-space pose by pointer jumping over the parent links, one round per
   dispatch and ceil(log2(depth + 1)) rounds for any tree shape (bone_jump), and

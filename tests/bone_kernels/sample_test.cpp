@@ -18,8 +18,11 @@
 #include <string>
 #include <vector>
 
-extern "C" void bone_sample_run(uint32_t, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, size_t, float *, float *, float *,
-		size_t);
+extern "C" void bone_sample_run(uint32_t, float, float, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, float *, size_t,
+		float *, float *, float *, size_t);
+// A double time as float hi + lo (df32), as the hosts split the engine's doubles.
+static inline float df_hi(double x) { return float(x); }
+static inline float df_lo(double x) { return float(x - double(float(x))); }
 
 template <class T>
 static std::vector<T> load(const std::string &path) {
@@ -64,7 +67,7 @@ int main(int argc, char **argv) {
 	const std::string mode = argc > 2 ? argv[2] : "";
 	std::ifstream mf(d + "/meta.json");
 	const std::string meta((std::istreambuf_iterator<char>(mf)), std::istreambuf_iterator<char>());
-	const float length = float(num(meta, "length"));
+	const double lengthD = num(meta, "length");
 	const uint32_t loopMode = uint32_t(num(meta, "loop_mode"));
 	const uint32_t T = uint32_t(num(meta, "tracks"));
 	const auto times = list(meta, "times");
@@ -75,20 +78,22 @@ int main(int argc, char **argv) {
 	auto keyTime = load<float>(d + "/key_time.bin");
 	auto keyVal = load<float>(d + "/key_val.bin");
 	auto keyTrans = load<float>(d + "/key_trans.bin");
+	auto keyTimeLo = load<float>(d + "/key_time_lo.bin");
 	auto expect = load<float>(d + "/expect.bin");
 	if (mode == "--control-transition") {
 		for (float &x : keyTrans) {
 			x = 1.0f;
 		}
 	}
-	const float shift = mode == "--control-time" ? 0.05f : 0.0f;
+	const double shift = mode == "--control-time" ? 0.05 : 0.0;
 	std::vector<float> pose(10 * size_t(T));
 	double worst = 0.0;
 	size_t worstRun = 0, worstTrack = 0;
 	for (size_t r = 0; r < times.size(); r++) {
 		std::fill(pose.begin(), pose.end(), 0.0f);
-		bone_sample_run(T, float(times[r]) + shift, length, loopMode, uint32_t(backward[r]), trackKeys.data(), trackDst.data(), trackKind.data(),
-				keyTime.data(), keyTime.size(), keyVal.data(), keyTrans.data(), pose.data(), pose.size());
+		const double tr = times[r] + shift;
+		bone_sample_run(T, df_hi(tr), df_lo(tr), df_hi(lengthD), df_lo(lengthD), loopMode, uint32_t(backward[r]), trackKeys.data(), trackDst.data(),
+				trackKind.data(), keyTime.data(), keyTimeLo.data(), keyTime.size(), keyVal.data(), keyTrans.data(), pose.data(), pose.size());
 		for (uint32_t t = 0; t < T; t++) {
 			const bool rot = (trackKind[t] & 1u) != 0;
 			const float *o = &expect[(r * T + t) * 4];
