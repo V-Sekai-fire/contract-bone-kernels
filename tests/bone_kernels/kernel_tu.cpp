@@ -7,9 +7,10 @@
 
 #if BONE_KERNEL == 1
 #include "bone_sample.cpu.cpp"
-extern "C" void bone_sample_run(uint32_t T, float time, float length, uint32_t loop, uint32_t *trackKeys, uint32_t *trackDst,
-		uint32_t *trackKind, float *keyTime, size_t K, float *keyVal, float *localPose, size_t localCount) {
-	BoneSampleParams_0 p{ T, time, length, loop };
+extern "C" void bone_sample_run(uint32_t T, float time, float length, uint32_t loopMode, uint32_t backward, uint32_t *trackKeys,
+		uint32_t *trackDst, uint32_t *trackKind, float *keyTime, size_t K, float *keyVal, float *keyTrans, float *localPose,
+		size_t localCount) {
+	BoneSampleParams_0 p{ T, time, length, loopMode, backward };
 	GlobalParams_0 g{};
 	g.params_0 = &p;
 	g.trackKeys_0.data = trackKeys; g.trackKeys_0.count = 2 * T;
@@ -17,6 +18,7 @@ extern "C" void bone_sample_run(uint32_t T, float time, float length, uint32_t l
 	g.trackKind_0.data = trackKind; g.trackKind_0.count = T;
 	g.keyTime_0.data = keyTime; g.keyTime_0.count = K;
 	g.keyVal_0.data = keyVal; g.keyVal_0.count = 4 * K;
+	g.keyTrans_0.data = keyTrans; g.keyTrans_0.count = K;
 	g.localPose_0.data = localPose; g.localPose_0.count = localCount;
 	ComputeVaryingInput vi{};
 	vi.startGroupID = uint3(0u, 0u, 0u);

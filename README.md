@@ -6,7 +6,7 @@ The animation mixer's per-frame bone work as Lean kernels. The kernels are emitt
 
 Four compute kernels do what the engine's clip player and skeleton do on the CPU each frame:
 
-1. `bone_sample` samples every keyframe track at the clip time. Position and scale use linear interpolation, and rotation uses spherical linear interpolation. Time wraps as in the linear loop mode.
+1. `bone_sample` samples every keyframe track at the clip time, as the engine's `Animation` track samplers do. It covers all seven interpolation modes (nearest, linear, cubic, makima and their angle variants), the none, linear and ping-pong loop modes with each track's loop-wrap setting, key transitions (easing, and 0 to hold a key), and backward playback for nearest keys.
 2. `bone_local` writes each bone's local pose as a 3×4 matrix.
 3. `bone_jump` does one pointer-jumping round: each bone multiplies in its current ancestor's transform, then points at that ancestor's ancestor. After ⌈log₂(depth + 1)⌉ rounds, every bone holds its skeleton-space pose. This works for any tree shape, so a chain of 4,096 bones takes 12 rounds.
 4. `bone_skin` multiplies each pose by its bind pose. It writes the 3×4 row layout that the skinning pass reads.
@@ -30,6 +30,8 @@ The fixtures in `tests/bone_kernels/fixtures/` are the engine's CPU results:
 - `random`: 4,096 bones with random parents, depth 16.
 
 The chain and random fixtures include non-uniform scale, so the bones below a scaled bone are sheared. Each `meta.json` says how its fixture was made.
+
+The fixtures in `tests/bone_kernels/fixtures_sample/` hold the engine's own track samples, one directory per loop mode. Each has 42 tracks: 7 interpolation modes × loop-wrap on and off × position, rotation and scale, with mixed key transitions. The engine's value is stored at 103 times, forward and backward. `sample_test` checks `bone_sample` against them. It has two controls that must fail: one samples 0.05 s late, and one ignores key transitions.
 
 The build finds the repositories it needs as sibling checkouts, at their paths in the goal manifest.
 

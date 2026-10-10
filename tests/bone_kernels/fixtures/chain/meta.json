@@ -3,8 +3,8 @@
  "bones": 512,
  "depth": 511,
  "length": 4.0,
- "loop": 1,
- "source": "engine CPU clip player + skeleton; chain skeleton of 512 bones, depth 511; rotation track on every non-root bone, position on every 5th, non-uniform scale on every 7th",
+ "source": "engine CPU clip player + skeleton; chain skeleton of 512 bones, depth 511; rotation track on every non-root bone, position on every 5th, non-uniform scale on every 7th; every track linear with loop_wrap on and transition 1 (the engine defaults); track_kind uses the bone_sample flag layout",
  "time": 1.9,
- "tracks": 686
+ "tracks": 686,
+ "loop_mode": 1
 }

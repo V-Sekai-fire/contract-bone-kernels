@@ -17,7 +17,8 @@
 #include <string>
 #include <vector>
 
-extern "C" void bone_sample_run(uint32_t, float, float, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, size_t, float *, float *, size_t);
+extern "C" void bone_sample_run(uint32_t, float, float, uint32_t, uint32_t, uint32_t *, uint32_t *, uint32_t *, float *, size_t, float *, float *, float *,
+		size_t);
 extern "C" void bone_local_run(uint32_t, uint32_t *, float *, float *, uint32_t *);
 extern "C" void bone_jump_run(uint32_t, float *, uint32_t *, float *, uint32_t *);
 extern "C" void bone_skin_run(uint32_t, uint32_t *, float *, float *, size_t, float *);
@@ -56,7 +57,7 @@ int main(int argc, char **argv) {
 	const std::string meta((std::istreambuf_iterator<char>(mf)), std::istreambuf_iterator<char>());
 	const float time = float(num(meta, "time")) + (control ? 0.25f : 0.0f);
 	const float length = float(num(meta, "length"));
-	const uint32_t loop = uint32_t(num(meta, "loop"));
+	const uint32_t loop = uint32_t(num(meta, "loop_mode"));
 	const uint32_t T = uint32_t(num(meta, "tracks"));
 	const size_t bones = size_t(num(meta, "bones"));
 	const uint32_t B = uint32_t(num(meta, "binds"));
@@ -65,6 +66,7 @@ int main(int argc, char **argv) {
 	auto trackKind = load<uint32_t>(d + "/track_kind.bin");
 	auto keyTime = load<float>(d + "/key_time.bin");
 	auto keyVal = load<float>(d + "/key_val.bin");
+	auto keyTrans = load<float>(d + "/key_trans.bin");
 	auto localPose = load<float>(d + "/local_pose.bin");
 	auto parent = load<uint32_t>(d + "/parent.bin");
 	auto bindBone = load<uint32_t>(d + "/bind_bone.bin");
@@ -72,8 +74,8 @@ int main(int argc, char **argv) {
 	auto expect = load<float>(d + "/expect_skin.bin");
 	std::vector<float> globalPose(12 * bones, 0.0f), skin(12 * size_t(B), 0.0f);
 
-	bone_sample_run(T, time, length, loop, trackKeys.data(), trackDst.data(), trackKind.data(), keyTime.data(), keyTime.size(),
-			keyVal.data(), localPose.data(), localPose.size());
+	bone_sample_run(T, time, length, loop, 0, trackKeys.data(), trackDst.data(), trackKind.data(), keyTime.data(), keyTime.size(),
+			keyVal.data(), keyTrans.data(), localPose.data(), localPose.size());
 	// local matrices, then pointer-jumping rounds until no bone has an ancestor left
 	const uint32_t N = uint32_t(bones);
 	std::vector<float> acc2(12 * bones, 0.0f);

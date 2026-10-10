@@ -2,9 +2,9 @@
  "binds": 201,
  "bones": 201,
  "length": 4.0,
- "loop": 1,
- "source": "engine CPU clip player + skeleton, one shared root per skeleton, 200 copies",
+ "source": "engine CPU clip player + skeleton, one shared root per skeleton, 200 copies; every track linear with loop_wrap on and transition 1 (the engine defaults); track_kind uses the bone_sample flag layout",
  "time": 1.9,
  "tracks": 200,
- "depth": 1
+ "depth": 1,
+ "loop_mode": 1
 }

@@ -26,6 +26,7 @@ for k in sample local jump skin; do
 	n=$((n + 1))
 done
 "$CXX" $FLAGS "$HERE/test.cpp" "$OUT/sample.o" "$OUT/local.o" "$OUT/jump.o" "$OUT/skin.o" -o "$OUT/bone_kernels_test"
+"$CXX" $FLAGS "$HERE/sample_test.cpp" "$OUT/sample.o" -o "$OUT/sample_test"
 rc=0
 for fx in "$HERE"/fixtures/*/; do
 	fx=${fx%/}
@@ -36,5 +37,17 @@ for fx in "$HERE"/fixtures/*/; do
 	else
 		echo "control failed on $(basename "$fx"), as it must"
 	fi
+done
+for fx in "$HERE"/fixtures_sample/*/; do
+	fx=${fx%/}
+	"$OUT/sample_test" "$fx" || rc=1
+	for c in --control-time --control-transition; do
+		if "$OUT/sample_test" "$fx" $c > /dev/null; then
+			echo "control $c passed on $(basename "$fx"), so the test cannot see that difference" >&2
+			rc=1
+		else
+			echo "control $c failed on $(basename "$fx"), as it must"
+		fi
+	done
 done
 exit $rc
