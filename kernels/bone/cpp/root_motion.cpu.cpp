@@ -4291,7 +4291,7 @@ struct RootMotionParams_0
 };
 
 
-#line 598
+#line 619
 struct GlobalParams_0
 {
     RootMotionParams_0* params_0;
@@ -4308,7 +4308,7 @@ struct GlobalParams_0
 };
 
 
-#line 598
+#line 619
 struct KernelContext_0
 {
     GlobalParams_0* globalParams_0;
@@ -4484,67 +4484,67 @@ static Vector<float, 2>  bk_df_sub_0(Vector<float, 2>  a_2, Vector<float, 2>  b_
 }
 
 
-#line 470
+#line 491
 static bool bk_df_eq_0(Vector<float, 2>  a_3, Vector<float, 2>  b_3)
 {
 
-#line 471
+#line 492
     Vector<float, 2>  _S8 = bk_df_sub_0(a_3, b_3);
 
-#line 471
+#line 492
     float d_0 = _S8.x + _S8.y;
 
-#line 471
+#line 492
     bool _S9;
     if(d_0 == 0.0f)
     {
 
-#line 472
+#line 493
         _S9 = true;
 
-#line 472
+#line 493
     }
     else
     {
 
-#line 472
+#line 493
         _S9 = (F32_abs((d_0))) < (F32_max((0.00000999999974738f * (F32_abs((a_3.x + a_3.y)))), (0.00000999999974738f)));
 
-#line 472
+#line 493
     }
 
-#line 472
+#line 493
     return _S9;
 }
 
 static bool bk_df_less_0(Vector<float, 2>  a_4, Vector<float, 2>  b_4)
 {
 
-#line 476
+#line 497
     Vector<float, 2>  _S10 = bk_df_sub_0(a_4, b_4);
 
-#line 476
+#line 497
     bool _S11;
 
-#line 476
+#line 497
     if((_S10.x + _S10.y) < 0.0f)
     {
 
-#line 476
+#line 497
         _S11 = !bk_df_eq_0(a_4, b_4);
 
-#line 476
+#line 497
     }
     else
     {
 
-#line 476
+#line 497
         _S11 = false;
 
-#line 476
+#line 497
     }
 
-#line 476
+#line 497
     return _S11;
 }
 
@@ -4634,59 +4634,59 @@ static float bk_fposmod_0(float x_5, float y_2)
 }
 
 
-#line 483
+#line 504
 static Vector<float, 2>  bk_wrap_prev_0(Vector<float, 2>  prev_0, Vector<float, 2>  st_0, Vector<float, 2>  en_0, uint32_t lm_0)
 {
 
-#line 484
+#line 505
     Vector<float, 2>  _S13 = bk_df_sub_0(prev_0, st_0);
 
-#line 484
+#line 505
     float x_6 = _S13.x + _S13.y;
     Vector<float, 2>  _S14 = bk_df_sub_0(en_0, st_0);
 
-#line 485
+#line 506
     float L_0 = _S14.x + _S14.y;
     float _S15 = bk_fposmod_0(x_6, L_0);
 
-#line 486
+#line 507
     float r_2;
     if(lm_0 == 2U)
     {
 
-#line 488
+#line 509
         if(L_0 != 0.0f)
         {
 
-#line 488
+#line 509
             float _S16 = x_6 - L_0;
 
-#line 488
+#line 509
             float _S17 = L_0 * 2.0f;
 
-#line 488
+#line 509
             r_2 = (F32_abs(((_S16 / _S17 - (F32_floor((_S16 / _S17)))) * L_0 * 2.0f - L_0)));
 
-#line 488
+#line 509
         }
         else
         {
 
-#line 488
+#line 509
             r_2 = 0.0f;
 
-#line 488
+#line 509
         }
 
-#line 487
+#line 508
     }
     else
     {
 
-#line 487
+#line 508
         r_2 = _S15;
 
-#line 487
+#line 508
     }
 
 
@@ -4694,35 +4694,35 @@ static Vector<float, 2>  bk_wrap_prev_0(Vector<float, 2>  prev_0, Vector<float, 
 }
 
 
-#line 479
+#line 500
 static bool bk_df_greater_0(Vector<float, 2>  a_5, Vector<float, 2>  b_5)
 {
 
-#line 480
+#line 501
     Vector<float, 2>  _S18 = bk_df_sub_0(a_5, b_5);
 
-#line 480
+#line 501
     bool _S19;
 
-#line 480
+#line 501
     if((_S18.x + _S18.y) > 0.0f)
     {
 
-#line 480
+#line 501
         _S19 = !bk_df_eq_0(a_5, b_5);
 
-#line 480
+#line 501
     }
     else
     {
 
-#line 480
+#line 501
         _S19 = false;
 
-#line 480
+#line 501
     }
 
-#line 480
+#line 501
     return _S19;
 }
 
@@ -6201,7 +6201,7 @@ static Vector<float, 4>  bk_sample_0(uint32_t i_2, Vector<float, 2>  tdf_0, Vect
     {
 
 #line 397
-        low_0 = (I32_min((mid_0), (len_2)));
+        low_1 = (I32_min((mid_0), (len_2)));
 
 #line 397
     }
@@ -6209,442 +6209,597 @@ static Vector<float, 4>  bk_sample_0(uint32_t i_2, Vector<float, 2>  tdf_0, Vect
     {
 
 #line 397
-        low_0 = (I32_min((mid_0), (_S70)));
+        low_1 = (I32_min((mid_0), (_S70)));
 
 #line 397
+    }
+    bool _S75 = ((flags_0 >> 6U) & 1U) != 0U;
+
+#line 398
+    int32_t base_0;
+
+#line 398
+    Vector<float, 2>  _S76;
+
+#line 398
+    if(_S75)
+    {
+
+#line 399
+        if(t_1 < 0.0f)
+        {
+
+#line 399
+            _S76 = Vector<float, 2> (0.0f, 0.0f);
+
+#line 399
+        }
+        else
+        {
+
+#line 399
+            _S76 = tdf_0;
+
+#line 399
+        }
+        Vector<float, 2>  _S77 = bk_df_sub_0(_S76, Ldf_0);
+
+#line 400
+        if((_S77.x + _S77.y) > 0.0f)
+        {
+
+#line 400
+            _S76 = Ldf_0;
+
+#line 400
+        }
+
+#line 400
+        low_0 = int(0);
+
+#line 400
+        high_0 = len_2;
+
+
+        for(;;)
+        {
+
+#line 403
+            if(low_0 < high_0)
+            {
+            }
+            else
+            {
+
+#line 403
+                break;
+            }
+
+#line 404
+            int32_t cm_0 = (low_0 + high_0) / int(2);
+            uint32_t _S78 = off_1 + uint32_t(cm_0);
+
+#line 405
+            if((bk_df_sub_0(Vector<float, 2> (kernelContext_1->globalParams_0->keyTime_0.Load(_S78), kernelContext_1->globalParams_0->keyTimeLo_0.Load(_S78)), _S76).x + bk_df_sub_0(Vector<float, 2> (kernelContext_1->globalParams_0->keyTime_0.Load(_S78), kernelContext_1->globalParams_0->keyTimeLo_0.Load(_S78)), _S76).y) <= 0.0f)
+            {
+
+#line 405
+                low_0 = cm_0 + int(1);
+
+#line 405
+            }
+            else
+            {
+
+#line 405
+                high_0 = cm_0;
+
+#line 405
+            }
+
+#line 403
+        }
+
+#line 411
+        int32_t base_1 = low_0 - int(1);
+        if(base_1 >= int(0))
+        {
+
+#line 413
+            int32_t ps_0 = base_1 - int32_t(kernelContext_1->globalParams_0->keyTrans_0.Load(off_1 + uint32_t(base_1)));
+            uint32_t _S79 = off_1 + uint32_t(ps_0);
+
+#line 414
+            if((bk_df_sub_0(Vector<float, 2> (kernelContext_1->globalParams_0->keyTime_0.Load(_S79), kernelContext_1->globalParams_0->keyTimeLo_0.Load(_S79)), _S76).x + bk_df_sub_0(Vector<float, 2> (kernelContext_1->globalParams_0->keyTime_0.Load(_S79), kernelContext_1->globalParams_0->keyTimeLo_0.Load(_S79)), _S76).y) == 0.0f)
+            {
+
+#line 414
+                base_0 = ps_0;
+
+#line 414
+            }
+            else
+            {
+
+#line 414
+                base_0 = base_1;
+
+#line 414
+            }
+
+#line 412
+        }
+        else
+        {
+
+#line 412
+            base_0 = base_1;
+
+#line 412
+        }
+
+#line 398
+    }
+    else
+    {
+
+#line 398
+        base_0 = low_1;
+
+#line 398
+        _S76 = tdf_0;
+
+#line 398
+    }
+
+#line 419
+    if(back_0)
+    {
+
+#line 419
+        low_0 = base_0 - int(-2);
+
+#line 419
+    }
+    else
+    {
+
+#line 419
+        low_0 = base_0 + int(-2);
+
+#line 419
     }
     if(back_0)
     {
 
-#line 398
-        high_0 = low_0 - int(-2);
+#line 420
+        high_0 = base_0 - int(-1);
 
-#line 398
+#line 420
     }
     else
     {
 
-#line 398
-        high_0 = low_0 + int(-2);
+#line 420
+        high_0 = base_0 + int(-1);
 
-#line 398
+#line 420
     }
 
-#line 398
-    int32_t pm1_0;
-    if(back_0)
-    {
-
-#line 399
-        pm1_0 = low_0 - int(-1);
-
-#line 399
-    }
-    else
-    {
-
-#line 399
-        pm1_0 = low_0 + int(-1);
-
-#line 399
-    }
-
-#line 399
+#line 420
     int32_t pn1_0;
 
     if(back_0)
     {
 
-#line 401
-        pn1_0 = low_0 - int(1);
+#line 422
+        pn1_0 = base_0 - int(1);
 
-#line 401
+#line 422
     }
     else
     {
 
-#line 401
-        pn1_0 = low_0 + int(1);
+#line 422
+        pn1_0 = base_0 + int(1);
 
-#line 401
+#line 422
     }
 
-#line 401
+#line 422
     int32_t pn2_0;
     if(back_0)
     {
 
-#line 402
-        pn2_0 = low_0 - int(2);
+#line 423
+        pn2_0 = base_0 - int(2);
 
-#line 402
+#line 423
     }
     else
     {
 
-#line 402
-        pn2_0 = low_0 + int(2);
+#line 423
+        pn2_0 = base_0 + int(2);
 
-#line 402
+#line 423
     }
 
-#line 402
+#line 423
     int32_t pn3_0;
     if(back_0)
     {
 
-#line 403
-        pn3_0 = low_0 - int(3);
+#line 424
+        pn3_0 = base_0 - int(3);
 
-#line 403
+#line 424
     }
     else
     {
 
-#line 403
-        pn3_0 = low_0 + int(3);
+#line 424
+        pn3_0 = base_0 + int(3);
 
-#line 403
+#line 424
     }
-    int32_t km2_0 = bk_fetch_idx_0(high_0, len_2, wrap_2, loopMode_0);
-    int32_t km1_0 = bk_fetch_idx_0(pm1_0, len_2, wrap_2, loopMode_0);
-    int32_t kn0_0 = bk_fetch_idx_0(low_0, len_2, wrap_2, loopMode_0);
+    int32_t km2_0 = bk_fetch_idx_0(low_0, len_2, wrap_2, loopMode_0);
+    int32_t km1_0 = bk_fetch_idx_0(high_0, len_2, wrap_2, loopMode_0);
+    int32_t kn0_0 = bk_fetch_idx_0(base_0, len_2, wrap_2, loopMode_0);
     int32_t kn1_0 = bk_fetch_idx_0(pn1_0, len_2, wrap_2, loopMode_0);
     int32_t kn2_0 = bk_fetch_idx_0(pn2_0, len_2, wrap_2, loopMode_0);
     int32_t kn3_0 = bk_fetch_idx_0(pn3_0, len_2, wrap_2, loopMode_0);
 
-#line 409
-    Vector<float, 2>  _S75 = bk_fetch_time_0(high_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S80 = bk_fetch_time_0(low_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 409
-    Vector<float, 2>  _S76 = bk_fetch_time_0(pm1_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S81 = bk_fetch_time_0(high_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 409
-    Vector<float, 2>  _S77 = bk_fetch_time_0(low_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S82 = bk_fetch_time_0(base_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 409
-    Vector<float, 2>  _S78 = bk_fetch_time_0(pn1_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S83 = bk_fetch_time_0(pn1_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 409
-    Vector<float, 2>  _S79 = bk_fetch_time_0(pn2_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S84 = bk_fetch_time_0(pn2_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 409
-    Vector<float, 2>  _S80 = bk_fetch_time_0(pn3_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
+#line 430
+    Vector<float, 2>  _S85 = bk_fetch_time_0(pn3_0, len_2, wrap_2, loopMode_0, off_1, Ldf_0, kernelContext_1);
 
-#line 416
-    uint32_t _S81 = (off_1 + uint32_t(km2_0)) * 4U;
+#line 437
+    uint32_t _S86 = (off_1 + uint32_t(km2_0)) * 4U;
 
-#line 416
-    float _S82 = kernelContext_1->globalParams_0->keyVal_0.Load(_S81);
+#line 437
+    float _S87 = kernelContext_1->globalParams_0->keyVal_0.Load(_S86);
 
-#line 416
-    float _S83 = kernelContext_1->globalParams_0->keyVal_0.Load(_S81 + 1U);
+#line 437
+    float _S88 = kernelContext_1->globalParams_0->keyVal_0.Load(_S86 + 1U);
 
-#line 416
-    float _S84 = kernelContext_1->globalParams_0->keyVal_0.Load(_S81 + 2U);
+#line 437
+    float _S89 = kernelContext_1->globalParams_0->keyVal_0.Load(_S86 + 2U);
 
-#line 416
-    Vector<float, 4>  vm2_0 = Vector<float, 4> (_S82, _S83, _S84, kernelContext_1->globalParams_0->keyVal_0.Load(_S81 + 3U));
-    uint32_t _S85 = (off_1 + uint32_t(km1_0)) * 4U;
+#line 437
+    Vector<float, 4>  vm2_0 = Vector<float, 4> (_S87, _S88, _S89, kernelContext_1->globalParams_0->keyVal_0.Load(_S86 + 3U));
+    uint32_t _S90 = (off_1 + uint32_t(km1_0)) * 4U;
 
-#line 417
-    float _S86 = kernelContext_1->globalParams_0->keyVal_0.Load(_S85);
-
-#line 417
-    float _S87 = kernelContext_1->globalParams_0->keyVal_0.Load(_S85 + 1U);
-
-#line 417
-    float _S88 = kernelContext_1->globalParams_0->keyVal_0.Load(_S85 + 2U);
-
-#line 417
-    Vector<float, 4>  vm1_0 = Vector<float, 4> (_S86, _S87, _S88, kernelContext_1->globalParams_0->keyVal_0.Load(_S85 + 3U));
-    uint32_t _S89 = off_1 + uint32_t(kn0_0);
-
-#line 418
-    uint32_t _S90 = _S89 * 4U;
-
-#line 418
+#line 438
     float _S91 = kernelContext_1->globalParams_0->keyVal_0.Load(_S90);
 
-#line 418
+#line 438
     float _S92 = kernelContext_1->globalParams_0->keyVal_0.Load(_S90 + 1U);
 
-#line 418
+#line 438
     float _S93 = kernelContext_1->globalParams_0->keyVal_0.Load(_S90 + 2U);
 
-#line 418
-    Vector<float, 4>  vn0_0 = Vector<float, 4> (_S91, _S92, _S93, kernelContext_1->globalParams_0->keyVal_0.Load(_S90 + 3U));
-    uint32_t _S94 = (off_1 + uint32_t(kn1_0)) * 4U;
+#line 438
+    Vector<float, 4>  vm1_0 = Vector<float, 4> (_S91, _S92, _S93, kernelContext_1->globalParams_0->keyVal_0.Load(_S90 + 3U));
+    uint32_t _S94 = off_1 + uint32_t(kn0_0);
 
-#line 419
-    float _S95 = kernelContext_1->globalParams_0->keyVal_0.Load(_S94);
+#line 439
+    uint32_t _S95 = _S94 * 4U;
 
-#line 419
-    float _S96 = kernelContext_1->globalParams_0->keyVal_0.Load(_S94 + 1U);
+#line 439
+    float _S96 = kernelContext_1->globalParams_0->keyVal_0.Load(_S95);
 
-#line 419
-    float _S97 = kernelContext_1->globalParams_0->keyVal_0.Load(_S94 + 2U);
+#line 439
+    float _S97 = kernelContext_1->globalParams_0->keyVal_0.Load(_S95 + 1U);
 
-#line 419
-    Vector<float, 4>  vn1_0 = Vector<float, 4> (_S95, _S96, _S97, kernelContext_1->globalParams_0->keyVal_0.Load(_S94 + 3U));
-    uint32_t _S98 = (off_1 + uint32_t(kn2_0)) * 4U;
+#line 439
+    float _S98 = kernelContext_1->globalParams_0->keyVal_0.Load(_S95 + 2U);
 
-#line 420
-    float _S99 = kernelContext_1->globalParams_0->keyVal_0.Load(_S98);
+#line 439
+    Vector<float, 4>  vn0_0 = Vector<float, 4> (_S96, _S97, _S98, kernelContext_1->globalParams_0->keyVal_0.Load(_S95 + 3U));
+    uint32_t _S99 = (off_1 + uint32_t(kn1_0)) * 4U;
 
-#line 420
-    float _S100 = kernelContext_1->globalParams_0->keyVal_0.Load(_S98 + 1U);
+#line 440
+    float _S100 = kernelContext_1->globalParams_0->keyVal_0.Load(_S99);
 
-#line 420
-    float _S101 = kernelContext_1->globalParams_0->keyVal_0.Load(_S98 + 2U);
+#line 440
+    float _S101 = kernelContext_1->globalParams_0->keyVal_0.Load(_S99 + 1U);
 
-#line 420
-    Vector<float, 4>  vn2_0 = Vector<float, 4> (_S99, _S100, _S101, kernelContext_1->globalParams_0->keyVal_0.Load(_S98 + 3U));
-    uint32_t _S102 = (off_1 + uint32_t(kn3_0)) * 4U;
+#line 440
+    float _S102 = kernelContext_1->globalParams_0->keyVal_0.Load(_S99 + 2U);
 
-#line 421
-    float _S103 = kernelContext_1->globalParams_0->keyVal_0.Load(_S102);
+#line 440
+    Vector<float, 4>  vn1_0 = Vector<float, 4> (_S100, _S101, _S102, kernelContext_1->globalParams_0->keyVal_0.Load(_S99 + 3U));
+    uint32_t _S103 = (off_1 + uint32_t(kn2_0)) * 4U;
 
-#line 421
-    float _S104 = kernelContext_1->globalParams_0->keyVal_0.Load(_S102 + 1U);
+#line 441
+    float _S104 = kernelContext_1->globalParams_0->keyVal_0.Load(_S103);
 
-#line 421
-    float _S105 = kernelContext_1->globalParams_0->keyVal_0.Load(_S102 + 2U);
+#line 441
+    float _S105 = kernelContext_1->globalParams_0->keyVal_0.Load(_S103 + 1U);
 
-#line 421
-    Vector<float, 4>  vn3_0 = Vector<float, 4> (_S103, _S104, _S105, kernelContext_1->globalParams_0->keyVal_0.Load(_S102 + 3U));
-    float tr_2 = kernelContext_1->globalParams_0->keyTrans_0.Load(_S89);
-    if(tr_2 == 0.0f)
+#line 441
+    float _S106 = kernelContext_1->globalParams_0->keyVal_0.Load(_S103 + 2U);
+
+#line 441
+    Vector<float, 4>  vn2_0 = Vector<float, 4> (_S104, _S105, _S106, kernelContext_1->globalParams_0->keyVal_0.Load(_S103 + 3U));
+    uint32_t _S107 = (off_1 + uint32_t(kn3_0)) * 4U;
+
+#line 442
+    float _S108 = kernelContext_1->globalParams_0->keyVal_0.Load(_S107);
+
+#line 442
+    float _S109 = kernelContext_1->globalParams_0->keyVal_0.Load(_S107 + 1U);
+
+#line 442
+    float _S110 = kernelContext_1->globalParams_0->keyVal_0.Load(_S107 + 2U);
+
+#line 442
+    Vector<float, 4>  vn3_0 = Vector<float, 4> (_S108, _S109, _S110, kernelContext_1->globalParams_0->keyVal_0.Load(_S107 + 3U));
+
+#line 442
+    float tr_2;
+    if(_S75)
     {
 
-#line 424
-        return vn0_0;
-    }
-    Vector<float, 2>  _S106 = bk_df_sub_0(_S78, _S77);
+#line 443
+        tr_2 = 1.0f;
 
-#line 426
-    float dlt_0 = _S106.x + _S106.y;
-
-#line 426
-    float w_8;
-    if((F32_abs((dlt_0))) < 0.00000999999974738f)
-    {
-
-#line 427
-        w_8 = 0.0f;
-
-#line 427
+#line 443
     }
     else
     {
 
-#line 427
-        Vector<float, 2>  _S107 = bk_df_sub_0(tdf_0, _S77);
+#line 443
+        tr_2 = kernelContext_1->globalParams_0->keyTrans_0.Load(_S94);
 
-#line 427
-        w_8 = (_S107.x + _S107.y) / dlt_0;
+#line 443
+    }
+    if(tr_2 == 0.0f)
+    {
 
-#line 427
+#line 445
+        return vn0_0;
+    }
+    Vector<float, 2>  _S111 = bk_df_sub_0(_S83, _S82);
+
+#line 447
+    float dlt_0 = _S111.x + _S111.y;
+
+#line 447
+    float w_8;
+    if((F32_abs((dlt_0))) < 0.00000999999974738f)
+    {
+
+#line 448
+        w_8 = 0.0f;
+
+#line 448
+    }
+    else
+    {
+
+#line 448
+        Vector<float, 2>  _S112 = bk_df_sub_0(_S76, _S82);
+
+#line 448
+        w_8 = (_S112.x + _S112.y) / dlt_0;
+
+#line 448
     }
     if(tr_2 != 1.0f)
     {
 
-#line 428
+#line 449
         w_8 = bk_ease_0(w_8, tr_2);
 
-#line 428
+#line 449
     }
 
 
     if(interp_0 == 0U)
     {
 
-#line 432
+#line 453
         return vn0_0;
     }
     bool scalar_0 = ((flags_0 >> 5U) & 1U) != 0U;
     if(scalar_0)
     {
 
-#line 435
+#line 456
         wrap_2 = interp_0 == 3U;
 
-#line 435
+#line 456
     }
     else
     {
 
-#line 435
+#line 456
         wrap_2 = false;
 
-#line 435
+#line 456
     }
 
-#line 435
+#line 456
     if(wrap_2)
     {
 
-#line 436
-        return Vector<float, 4> (bk_fposmod_0(_S91 + bk_angle_diff_0(_S91, _S95) * w_8, 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
+#line 457
+        return Vector<float, 4> (bk_fposmod_0(_S96 + bk_angle_diff_0(_S96, _S100) * w_8, 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
     }
     if(scalar_0)
     {
 
-#line 438
+#line 459
         wrap_2 = interp_0 == 4U;
 
-#line 438
+#line 459
     }
     else
     {
 
-#line 438
+#line 459
         wrap_2 = false;
 
-#line 438
+#line 459
     }
 
-#line 438
+#line 459
     if(wrap_2)
     {
 
-#line 439
-        return Vector<float, 4> (bk_fposmod_0(bk_cubic_angle_0(_S91, _S95, _S86, _S99, w_8, _S106, bk_df_sub_0(_S76, _S77), bk_df_sub_0(_S79, _S77)), 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
+#line 460
+        return Vector<float, 4> (bk_fposmod_0(bk_cubic_angle_0(_S96, _S100, _S91, _S104, w_8, _S111, bk_df_sub_0(_S81, _S82), bk_df_sub_0(_S84, _S82)), 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
     }
     if(scalar_0)
     {
 
-#line 441
+#line 462
         wrap_2 = interp_0 == 6U;
 
-#line 441
+#line 462
     }
     else
     {
 
-#line 441
+#line 462
         wrap_2 = false;
 
-#line 441
+#line 462
     }
 
-#line 441
+#line 462
     if(wrap_2)
     {
 
-#line 442
-        return Vector<float, 4> (bk_fposmod_0(bk_makima_angle_0(_S91, _S95, _S86, _S99, _S82, _S103, w_8, _S106, bk_df_sub_0(_S76, _S77), bk_df_sub_0(_S79, _S77), bk_df_sub_0(_S75, _S77), bk_df_sub_0(_S80, _S77)), 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
+#line 463
+        return Vector<float, 4> (bk_fposmod_0(bk_makima_angle_0(_S96, _S100, _S91, _S104, _S87, _S108, w_8, _S111, bk_df_sub_0(_S81, _S82), bk_df_sub_0(_S84, _S82), bk_df_sub_0(_S80, _S82), bk_df_sub_0(_S85, _S82)), 6.28318548202514648f), 0.0f, 0.0f, 0.0f);
     }
     if(interp_0 == 1U)
     {
 
-#line 444
+#line 465
         wrap_2 = true;
 
-#line 444
+#line 465
     }
     else
     {
 
-#line 444
+#line 465
         wrap_2 = interp_0 == 3U;
 
-#line 444
+#line 465
     }
 
-#line 444
+#line 465
     if(wrap_2)
     {
 
-#line 445
+#line 466
         if(kind_0 == 0U)
         {
 
-#line 446
+#line 467
             return vn0_0 + (vn1_0 - vn0_0) * (Vector<float, 4> )w_8;
         }
         else
         {
 
-#line 448
+#line 469
             return bk_slerp_0(vn0_0, vn1_0, w_8);
         }
 
-#line 448
+#line 469
     }
 
 
     if(interp_0 == 2U)
     {
 
-#line 451
+#line 472
         wrap_2 = true;
 
-#line 451
+#line 472
     }
     else
     {
 
-#line 451
+#line 472
         wrap_2 = interp_0 == 4U;
 
-#line 451
+#line 472
     }
 
-#line 451
+#line 472
     if(wrap_2)
     {
 
-#line 452
+#line 473
         if(kind_0 == 0U)
         {
 
-#line 453
-            Vector<float, 2>  _S108 = bk_df_sub_0(_S76, _S77);
+#line 474
+            Vector<float, 2>  _S113 = bk_df_sub_0(_S81, _S82);
 
-#line 453
-            Vector<float, 2>  _S109 = bk_df_sub_0(_S79, _S77);
+#line 474
+            Vector<float, 2>  _S114 = bk_df_sub_0(_S84, _S82);
 
-#line 453
-            return Vector<float, 4> (bk_cubic_0(_S91, _S95, _S86, _S99, w_8, _S106, _S108, _S109), bk_cubic_0(_S92, _S96, _S87, _S100, w_8, _S106, _S108, _S109), bk_cubic_0(_S93, _S97, _S88, _S101, w_8, _S106, _S108, _S109), 0.0f);
+#line 474
+            return Vector<float, 4> (bk_cubic_0(_S96, _S100, _S91, _S104, w_8, _S111, _S113, _S114), bk_cubic_0(_S97, _S101, _S92, _S105, w_8, _S111, _S113, _S114), bk_cubic_0(_S98, _S102, _S93, _S106, w_8, _S111, _S113, _S114), 0.0f);
         }
         else
         {
 
-#line 455
-            return bk_sq_cubic_0(vn0_0, vn1_0, vm1_0, vn2_0, w_8, _S106, bk_df_sub_0(_S76, _S77), bk_df_sub_0(_S79, _S77));
+#line 476
+            return bk_sq_cubic_0(vn0_0, vn1_0, vm1_0, vn2_0, w_8, _S111, bk_df_sub_0(_S81, _S82), bk_df_sub_0(_S84, _S82));
         }
 
-#line 455
+#line 476
     }
 
 
     if(kind_0 == 0U)
     {
 
-#line 459
-        Vector<float, 2>  _S110 = bk_df_sub_0(_S76, _S77);
+#line 480
+        Vector<float, 2>  _S115 = bk_df_sub_0(_S81, _S82);
 
-#line 459
-        Vector<float, 2>  _S111 = bk_df_sub_0(_S79, _S77);
+#line 480
+        Vector<float, 2>  _S116 = bk_df_sub_0(_S84, _S82);
 
-#line 459
-        Vector<float, 2>  _S112 = bk_df_sub_0(_S75, _S77);
+#line 480
+        Vector<float, 2>  _S117 = bk_df_sub_0(_S80, _S82);
 
-#line 459
-        Vector<float, 2>  _S113 = bk_df_sub_0(_S80, _S77);
+#line 480
+        Vector<float, 2>  _S118 = bk_df_sub_0(_S85, _S82);
 
-#line 459
-        return Vector<float, 4> (bk_makima_0(_S91, _S95, _S86, _S99, _S82, _S103, w_8, _S106, _S110, _S111, _S112, _S113), bk_makima_0(_S92, _S96, _S87, _S100, _S83, _S104, w_8, _S106, _S110, _S111, _S112, _S113), bk_makima_0(_S93, _S97, _S88, _S101, _S84, _S105, w_8, _S106, _S110, _S111, _S112, _S113), 0.0f);
+#line 480
+        return Vector<float, 4> (bk_makima_0(_S96, _S100, _S91, _S104, _S87, _S108, w_8, _S111, _S115, _S116, _S117, _S118), bk_makima_0(_S97, _S101, _S92, _S105, _S88, _S109, w_8, _S111, _S115, _S116, _S117, _S118), bk_makima_0(_S98, _S102, _S93, _S106, _S89, _S110, w_8, _S111, _S115, _S116, _S117, _S118), 0.0f);
     }
     else
     {
 
-#line 461
-        return bk_sq_makima_0(vn0_0, vn1_0, vm1_0, vn2_0, vm2_0, vn3_0, w_8, _S106, bk_df_sub_0(_S76, _S77), bk_df_sub_0(_S79, _S77), bk_df_sub_0(_S75, _S77), bk_df_sub_0(_S80, _S77));
+#line 482
+        return bk_sq_makima_0(vn0_0, vn1_0, vm1_0, vn2_0, vm2_0, vn3_0, w_8, _S111, bk_df_sub_0(_S81, _S82), bk_df_sub_0(_S84, _S82), bk_df_sub_0(_S80, _S82), bk_df_sub_0(_S85, _S82));
     }
 
-#line 461
+#line 482
 }
 
 
@@ -6655,243 +6810,243 @@ static Vector<float, 3>  bk_xform_inv_0(Vector<float, 4>  q_0, Vector<float, 3> 
 }
 
 
-#line 494
-void _main_0(void* _S114, void* entryPointParams_0, void* globalParams_1)
+#line 515
+void _main_0(void* _S119, void* entryPointParams_0, void* globalParams_1)
 {
 
-#line 494
-    ComputeThreadVaryingInput * _S115 = (slang_bit_cast<ComputeThreadVaryingInput *>(_S114));
+#line 515
+    ComputeThreadVaryingInput * _S120 = (slang_bit_cast<ComputeThreadVaryingInput *>(_S119));
 
-#line 494
+#line 515
     KernelContext_0 kernelContext_2;
 
-#line 494
+#line 515
     (&kernelContext_2)->globalParams_0 = (slang_bit_cast<GlobalParams_0*>(globalParams_1));
-    if(((_S115->groupID + _S115->groupThreadID).x) != 0U)
+    if(((_S120->groupID + _S120->groupThreadID).x) != 0U)
     {
 
-#line 496
+#line 517
         return;
     }
-    bool _S116 = ((&kernelContext_2)->globalParams_0->params_0->deterministic_0) != 0U;
+    bool _S121 = ((&kernelContext_2)->globalParams_0->params_0->deterministic_0) != 0U;
 
-#line 498
+#line 519
     float total_0 = 0.0f;
 
-#line 498
+#line 519
     uint32_t i_3 = 0U;
 
     for(;;)
     {
 
-#line 500
+#line 521
         if(i_3 < ((&kernelContext_2)->globalParams_0->params_0->I_0))
         {
         }
         else
         {
 
-#line 500
+#line 521
             break;
         }
 
-#line 501
+#line 522
         if((((&kernelContext_2)->globalParams_0->instU_0).Load(i_3 * 6U + 1U) & 8U) != 0U)
         {
 
-#line 501
+#line 522
             total_0 = total_0 + (&kernelContext_2)->globalParams_0->weight_0.Load(i_3);
 
-#line 501
+#line 522
         }
 
-#line 500
+#line 521
         i_3 = i_3 + 1U;
 
-#line 500
+#line 521
     }
 
-#line 506
-    Vector<float, 4>  _S117 = Vector<float, 4> (0.0f, 0.0f, 0.0f, 1.0f);
-    Vector<float, 3>  _S118 = Vector<float, 3> (1.0f, 1.0f, 1.0f);
+#line 527
+    Vector<float, 4>  _S122 = Vector<float, 4> (0.0f, 0.0f, 0.0f, 1.0f);
+    Vector<float, 3>  _S123 = Vector<float, 3> (1.0f, 1.0f, 1.0f);
 
-#line 507
+#line 528
     Vector<float, 3>  loc_0 = Vector<float, 3> (0.0f, 0.0f, 0.0f);
 
-#line 507
-    Vector<float, 4>  rot_0 = _S117;
+#line 528
+    Vector<float, 4>  rot_0 = _S122;
 
-#line 507
-    Vector<float, 3>  sc_0 = _S118;
+#line 528
+    Vector<float, 3>  sc_0 = _S123;
 
-#line 507
+#line 528
     i_3 = 0U;
     for(;;)
     {
 
-#line 508
+#line 529
         if(i_3 < ((&kernelContext_2)->globalParams_0->params_0->I_0))
         {
         }
         else
         {
 
-#line 508
+#line 529
             break;
         }
 
-#line 509
-        uint32_t _S119 = i_3 * 6U;
+#line 530
+        uint32_t _S124 = i_3 * 6U;
 
-#line 509
-        uint32_t fl_0 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S119 + 1U);
+#line 530
+        uint32_t fl_0 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S124 + 1U);
         float bl_0 = (&kernelContext_2)->globalParams_0->weight_0.Load(i_3);
 
-#line 510
+#line 531
         float bl_1;
-        if(!_S116)
+        if(!_S121)
         {
 
-#line 512
+#line 533
             if((F32_abs((total_0))) < 0.00000999999974738f)
             {
 
-#line 512
+#line 533
                 bl_1 = 0.0f;
 
-#line 512
+#line 533
             }
             else
             {
 
-#line 512
+#line 533
                 bl_1 = bl_0 / total_0;
 
-#line 512
+#line 533
             }
 
-#line 511
+#line 532
         }
         else
         {
 
-#line 511
+#line 532
             bl_1 = bl_0;
 
-#line 511
+#line 532
         }
 
-#line 511
-        bool _S120;
+#line 532
+        bool _S125;
 
 
         if((fl_0 & 8U) != 0U)
         {
 
-#line 514
-            _S120 = (fl_0 & 1U) != 0U;
+#line 535
+            _S125 = (fl_0 & 1U) != 0U;
 
-#line 514
+#line 535
         }
         else
         {
 
-#line 514
-            _S120 = false;
+#line 535
+            _S125 = false;
 
-#line 514
+#line 535
         }
 
-#line 514
-        bool _S121;
+#line 535
+        bool _S126;
 
-#line 514
-        if(_S120)
+#line 535
+        if(_S125)
         {
 
-#line 514
-            _S121 = (F32_abs((bl_1))) >= 0.00000999999974738f;
+#line 535
+            _S126 = (F32_abs((bl_1))) >= 0.00000999999974738f;
 
-#line 514
+#line 535
         }
         else
         {
 
-#line 514
-            _S121 = false;
+#line 535
+            _S126 = false;
 
-#line 514
+#line 535
         }
 
-#line 514
+#line 535
         Vector<float, 3>  loc_1;
 
-#line 514
+#line 535
         Vector<float, 3>  sc_1;
 
-#line 514
+#line 535
         Vector<float, 4>  rot_1;
 
-#line 514
-        if(_S121)
+#line 535
+        if(_S126)
         {
 
-#line 515
-            uint32_t lm_1 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S119);
+#line 536
+            uint32_t lm_1 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S124);
             bool back_1 = (fl_0 & 2U) != 0U;
-            uint32_t _S122 = i_3 * 10U;
+            uint32_t _S127 = i_3 * 10U;
 
-#line 517
-            Vector<float, 2>  tt_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S122), (&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 1U));
+#line 538
+            Vector<float, 2>  tt_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S127), (&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 1U));
 
-            Vector<float, 2>  st_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 4U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 5U));
-            Vector<float, 2>  en_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 6U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 7U));
-            Vector<float, 2>  _S123 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 8U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 9U));
-            uint32_t _S124 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S119 + 5U);
-            Vector<float, 2>  prev0_0 = bk_df_sub_0(tt_1, Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 2U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S122 + 3U)));
-            bool _S125 = !back_1;
+            Vector<float, 2>  st_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 4U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 5U));
+            Vector<float, 2>  en_1 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 6U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 7U));
+            Vector<float, 2>  _S128 = Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 8U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 9U));
+            uint32_t _S129 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S124 + 5U);
+            Vector<float, 2>  prev0_0 = bk_df_sub_0(tt_1, Vector<float, 2> ((&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 2U), (&kernelContext_2)->globalParams_0->instF_0.Load(_S127 + 3U)));
+            bool _S130 = !back_1;
 
-#line 524
+#line 545
             Vector<float, 2>  prev0_1;
 
-#line 524
-            if(_S125)
+#line 545
+            if(_S130)
             {
 
-#line 525
+#line 546
                 if(bk_df_less_0(prev0_0, st_1))
                 {
 
-#line 526
+#line 547
                     if(lm_1 == 0U)
                     {
 
-#line 526
+#line 547
                         prev0_1 = st_1;
 
-#line 526
+#line 547
                     }
                     else
                     {
 
-#line 526
+#line 547
                         prev0_1 = bk_wrap_prev_0(prev0_0, st_1, en_1, lm_1);
 
-#line 526
+#line 547
                     }
 
-#line 525
+#line 546
                 }
                 else
                 {
 
-#line 525
+#line 546
                     prev0_1 = prev0_0;
 
-#line 525
+#line 546
                 }
 
-#line 524
+#line 545
             }
             else
             {
@@ -6900,686 +7055,686 @@ void _main_0(void* _S114, void* entryPointParams_0, void* globalParams_1)
                 if(bk_df_greater_0(prev0_0, en_1))
                 {
 
-#line 530
+#line 551
                     if(lm_1 == 0U)
                     {
 
-#line 530
+#line 551
                         prev0_1 = en_1;
 
-#line 530
+#line 551
                     }
                     else
                     {
 
-#line 530
+#line 551
                         prev0_1 = bk_wrap_prev_0(prev0_0, st_1, en_1, lm_1);
 
-#line 530
+#line 551
                     }
 
-#line 529
+#line 550
                 }
                 else
                 {
 
-#line 529
+#line 550
                     prev0_1 = prev0_0;
 
-#line 529
+#line 550
                 }
 
-#line 524
+#line 545
             }
 
-#line 524
+#line 545
             Vector<float, 3>  loc_2 = loc_0;
 
-#line 524
+#line 545
             Vector<float, 4>  rot_2 = rot_0;
 
-#line 524
+#line 545
             Vector<float, 3>  sc_2 = sc_0;
 
-#line 524
+#line 545
             uint32_t ch_0 = 0U;
 
-#line 533
+#line 554
             for(;;)
             {
 
-#line 533
+#line 554
                 if(ch_0 < 3U)
                 {
                 }
                 else
                 {
 
-#line 533
+#line 554
                     break;
                 }
 
-#line 534
-                uint32_t tk_0 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S119 + 2U + ch_0);
+#line 555
+                uint32_t tk_0 = (&kernelContext_2)->globalParams_0->instU_0.Load(_S124 + 2U + ch_0);
                 if(tk_0 != 4294967295U)
                 {
 
-#line 535
-                    bool _S126;
+#line 556
+                    bool _S131;
 
-                    if(_S125)
+                    if(_S130)
                     {
 
-#line 537
-                        _S126 = bk_df_greater_0(prev0_1, tt_1);
+#line 558
+                        _S131 = bk_df_greater_0(prev0_1, tt_1);
 
-#line 537
+#line 558
                     }
                     else
                     {
 
-#line 537
-                        _S126 = false;
+#line 558
+                        _S131 = false;
 
-#line 537
+#line 558
                     }
 
-#line 537
-                    bool _S127;
+#line 558
+                    bool _S132;
 
-#line 537
+#line 558
                     Vector<float, 2>  pv_0;
 
-#line 537
-                    if(_S126)
+#line 558
+                    if(_S131)
                     {
 
-#line 538
+#line 559
                         if(ch_0 == 0U)
                         {
 
-#line 538
-                            Vector<float, 4>  _S128 = bk_sample_0(tk_0, en_1, _S123, lm_1, 0U, &kernelContext_2);
-                            Vector<float, 3>  _S129 = Vector<float, 3> {_S128.x, _S128.y, _S128.z};
+#line 559
+                            Vector<float, 4>  _S133 = bk_sample_0(tk_0, en_1, _S128, lm_1, 0U, &kernelContext_2);
+                            Vector<float, 3>  _S134 = Vector<float, 3> {_S133.x, _S133.y, _S133.z};
 
-#line 539
-                            Vector<float, 4>  _S130 = bk_sample_0(tk_0, prev0_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 560
+                            Vector<float, 4>  _S135 = bk_sample_0(tk_0, prev0_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 539
-                            Vector<float, 3>  d_2 = _S129 - Vector<float, 3> {_S130.x, _S130.y, _S130.z};
+#line 560
+                            Vector<float, 3>  d_2 = _S134 - Vector<float, 3> {_S135.x, _S135.y, _S135.z};
                             if(((&kernelContext_2)->globalParams_0->params_0->local_0) != 0U)
                             {
 
-#line 540
-                                _S127 = _S124 != 4294967295U;
+#line 561
+                                _S132 = _S129 != 4294967295U;
 
-#line 540
+#line 561
                             }
                             else
                             {
 
-#line 540
-                                _S127 = false;
+#line 561
+                                _S132 = false;
 
-#line 540
+#line 561
                             }
 
-#line 540
-                            if(_S127)
+#line 561
+                            if(_S132)
                             {
 
-#line 541
-                                if(_S124 == 4294967294U)
+#line 562
+                                if(_S129 == 4294967294U)
                                 {
 
-#line 541
-                                    rot_1 = _S117;
+#line 562
+                                    rot_1 = _S122;
 
-#line 541
+#line 562
                                 }
                                 else
                                 {
 
-#line 541
-                                    Vector<float, 4>  _S131 = bk_sample_0(_S124, en_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 562
+                                    Vector<float, 4>  _S136 = bk_sample_0(_S129, en_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 541
-                                    rot_1 = _S131;
+#line 562
+                                    rot_1 = _S136;
 
-#line 541
+#line 562
                                 }
 
-#line 541
+#line 562
                                 loc_1 = bk_xform_inv_0(rot_1, d_2);
 
-#line 540
+#line 561
                             }
                             else
                             {
 
-#line 540
+#line 561
                                 loc_1 = d_2;
 
-#line 540
+#line 561
                             }
 
-#line 540
+#line 561
                             loc_1 = loc_2 + loc_1 * (Vector<float, 3> )bl_1;
 
-#line 538
+#line 559
                         }
                         else
                         {
 
-#line 538
+#line 559
                             loc_1 = loc_2;
 
-#line 538
+#line 559
                         }
 
-#line 546
+#line 567
                         if(ch_0 == 1U)
                         {
 
-#line 546
-                            Vector<float, 4>  _S132 = bk_sample_0(tk_0, prev0_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 567
+                            Vector<float, 4>  _S137 = bk_sample_0(tk_0, prev0_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 546
-                            Vector<float, 4>  _S133 = bk_sample_0(tk_0, en_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 567
+                            Vector<float, 4>  _S138 = bk_sample_0(tk_0, en_1, _S128, lm_1, 0U, &kernelContext_2);
 
 
-                            Vector<float, 4>  nr_0 = bk_qmul_0(rot_2, bk_slerp_0(_S117, bk_qmul_0(bk_qinv_0(_S132), _S133), bl_1));
+                            Vector<float, 4>  nr_0 = bk_qmul_0(rot_2, bk_slerp_0(_S122, bk_qmul_0(bk_qinv_0(_S137), _S138), bl_1));
 
-#line 549
+#line 570
                             rot_1 = nr_0 / (Vector<float, 4> )(F32_max((length_1(nr_0)), (9.99999968265522539e-21f)));
 
-#line 546
+#line 567
                         }
                         else
                         {
 
-#line 546
+#line 567
                             rot_1 = rot_2;
 
-#line 546
+#line 567
                         }
 
-#line 552
+#line 573
                         if(ch_0 == 2U)
                         {
 
-#line 552
-                            Vector<float, 4>  _S134 = bk_sample_0(tk_0, en_1, _S123, lm_1, 0U, &kernelContext_2);
-                            Vector<float, 3>  _S135 = Vector<float, 3> {_S134.x, _S134.y, _S134.z};
+#line 573
+                            Vector<float, 4>  _S139 = bk_sample_0(tk_0, en_1, _S128, lm_1, 0U, &kernelContext_2);
+                            Vector<float, 3>  _S140 = Vector<float, 3> {_S139.x, _S139.y, _S139.z};
 
-#line 553
-                            Vector<float, 4>  _S136 = bk_sample_0(tk_0, prev0_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 574
+                            Vector<float, 4>  _S141 = bk_sample_0(tk_0, prev0_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 553
-                            sc_1 = sc_2 + (_S135 - Vector<float, 3> {_S136.x, _S136.y, _S136.z}) * (Vector<float, 3> )bl_1;
+#line 574
+                            sc_1 = sc_2 + (_S140 - Vector<float, 3> {_S141.x, _S141.y, _S141.z}) * (Vector<float, 3> )bl_1;
 
-#line 552
+#line 573
                         }
                         else
                         {
 
-#line 552
+#line 573
                             sc_1 = sc_2;
 
-#line 552
+#line 573
                         }
 
-#line 552
+#line 573
                         pv_0 = st_1;
 
-#line 537
+#line 558
                     }
                     else
                     {
 
-#line 537
+#line 558
                         pv_0 = prev0_1;
 
-#line 537
+#line 558
                         loc_1 = loc_2;
 
-#line 537
+#line 558
                         rot_1 = rot_2;
 
-#line 537
+#line 558
                         sc_1 = sc_2;
 
-#line 537
+#line 558
                     }
 
-#line 557
+#line 578
                     if(back_1)
                     {
 
-#line 557
-                        _S127 = bk_df_less_0(pv_0, tt_1);
+#line 578
+                        _S132 = bk_df_less_0(pv_0, tt_1);
 
-#line 557
+#line 578
                     }
                     else
                     {
 
-#line 557
-                        _S127 = false;
+#line 578
+                        _S132 = false;
 
-#line 557
+#line 578
                     }
 
-#line 557
+#line 578
                     Vector<float, 3>  loc_3;
 
-#line 557
+#line 578
                     Vector<float, 3>  sc_3;
 
-#line 557
+#line 578
                     Vector<float, 4>  rot_3;
 
-#line 557
-                    bool _S137;
+#line 578
+                    bool _S142;
 
-#line 557
+#line 578
                     Vector<float, 2>  pv_1;
 
-#line 557
-                    if(_S127)
+#line 578
+                    if(_S132)
                     {
 
-#line 558
+#line 579
                         if(ch_0 == 0U)
                         {
 
-#line 558
-                            Vector<float, 4>  _S138 = bk_sample_0(tk_0, st_1, _S123, lm_1, 0U, &kernelContext_2);
-                            Vector<float, 3>  _S139 = Vector<float, 3> {_S138.x, _S138.y, _S138.z};
+#line 579
+                            Vector<float, 4>  _S143 = bk_sample_0(tk_0, st_1, _S128, lm_1, 0U, &kernelContext_2);
+                            Vector<float, 3>  _S144 = Vector<float, 3> {_S143.x, _S143.y, _S143.z};
 
-#line 559
-                            Vector<float, 4>  _S140 = bk_sample_0(tk_0, pv_0, _S123, lm_1, 0U, &kernelContext_2);
+#line 580
+                            Vector<float, 4>  _S145 = bk_sample_0(tk_0, pv_0, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 559
-                            Vector<float, 3>  d_3 = _S139 - Vector<float, 3> {_S140.x, _S140.y, _S140.z};
+#line 580
+                            Vector<float, 3>  d_3 = _S144 - Vector<float, 3> {_S145.x, _S145.y, _S145.z};
                             if(((&kernelContext_2)->globalParams_0->params_0->local_0) != 0U)
                             {
 
-#line 560
-                                _S137 = _S124 != 4294967295U;
+#line 581
+                                _S142 = _S129 != 4294967295U;
 
-#line 560
+#line 581
                             }
                             else
                             {
 
-#line 560
-                                _S137 = false;
+#line 581
+                                _S142 = false;
 
-#line 560
+#line 581
                             }
 
-#line 560
-                            if(_S137)
+#line 581
+                            if(_S142)
                             {
 
-#line 561
-                                if(_S124 == 4294967294U)
+#line 582
+                                if(_S129 == 4294967294U)
                                 {
 
-#line 561
-                                    rot_3 = _S117;
+#line 582
+                                    rot_3 = _S122;
 
-#line 561
+#line 582
                                 }
                                 else
                                 {
 
-#line 561
-                                    Vector<float, 4>  _S141 = bk_sample_0(_S124, st_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 582
+                                    Vector<float, 4>  _S146 = bk_sample_0(_S129, st_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 561
-                                    rot_3 = _S141;
+#line 582
+                                    rot_3 = _S146;
 
-#line 561
+#line 582
                                 }
 
-#line 561
+#line 582
                                 loc_3 = bk_xform_inv_0(rot_3, d_3);
 
-#line 560
+#line 581
                             }
                             else
                             {
 
-#line 560
+#line 581
                                 loc_3 = d_3;
 
-#line 560
+#line 581
                             }
 
-#line 560
+#line 581
                             loc_3 = loc_1 + loc_3 * (Vector<float, 3> )bl_1;
 
-#line 558
+#line 579
                         }
                         else
                         {
 
-#line 558
+#line 579
                             loc_3 = loc_1;
 
-#line 558
+#line 579
                         }
 
-#line 566
+#line 587
                         if(ch_0 == 1U)
                         {
 
-#line 566
-                            Vector<float, 4>  _S142 = bk_sample_0(tk_0, pv_0, _S123, lm_1, 0U, &kernelContext_2);
+#line 587
+                            Vector<float, 4>  _S147 = bk_sample_0(tk_0, pv_0, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 566
-                            Vector<float, 4>  _S143 = bk_sample_0(tk_0, st_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 587
+                            Vector<float, 4>  _S148 = bk_sample_0(tk_0, st_1, _S128, lm_1, 0U, &kernelContext_2);
 
 
-                            Vector<float, 4>  nr_1 = bk_qmul_0(rot_1, bk_slerp_0(_S117, bk_qmul_0(bk_qinv_0(_S142), _S143), bl_1));
+                            Vector<float, 4>  nr_1 = bk_qmul_0(rot_1, bk_slerp_0(_S122, bk_qmul_0(bk_qinv_0(_S147), _S148), bl_1));
 
-#line 569
+#line 590
                             rot_3 = nr_1 / (Vector<float, 4> )(F32_max((length_1(nr_1)), (9.99999968265522539e-21f)));
 
-#line 566
+#line 587
                         }
                         else
                         {
 
-#line 566
+#line 587
                             rot_3 = rot_1;
 
-#line 566
+#line 587
                         }
 
-#line 572
+#line 593
                         if(ch_0 == 2U)
                         {
 
-#line 572
-                            Vector<float, 4>  _S144 = bk_sample_0(tk_0, st_1, _S123, lm_1, 0U, &kernelContext_2);
-                            Vector<float, 3>  _S145 = Vector<float, 3> {_S144.x, _S144.y, _S144.z};
+#line 593
+                            Vector<float, 4>  _S149 = bk_sample_0(tk_0, st_1, _S128, lm_1, 0U, &kernelContext_2);
+                            Vector<float, 3>  _S150 = Vector<float, 3> {_S149.x, _S149.y, _S149.z};
 
-#line 573
-                            Vector<float, 4>  _S146 = bk_sample_0(tk_0, pv_0, _S123, lm_1, 0U, &kernelContext_2);
+#line 594
+                            Vector<float, 4>  _S151 = bk_sample_0(tk_0, pv_0, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 573
-                            sc_3 = sc_1 + (_S145 - Vector<float, 3> {_S146.x, _S146.y, _S146.z}) * (Vector<float, 3> )bl_1;
+#line 594
+                            sc_3 = sc_1 + (_S150 - Vector<float, 3> {_S151.x, _S151.y, _S151.z}) * (Vector<float, 3> )bl_1;
 
-#line 572
+#line 593
                         }
                         else
                         {
 
-#line 572
+#line 593
                             sc_3 = sc_1;
 
-#line 572
+#line 593
                         }
 
-#line 572
+#line 593
                         pv_1 = en_1;
 
-#line 557
+#line 578
                     }
                     else
                     {
 
-#line 557
+#line 578
                         pv_1 = pv_0;
 
-#line 557
+#line 578
                         loc_3 = loc_1;
 
-#line 557
+#line 578
                         rot_3 = rot_1;
 
-#line 557
+#line 578
                         sc_3 = sc_1;
 
-#line 557
+#line 578
                     }
 
-#line 557
+#line 578
                     Vector<float, 3>  loc_4;
 
-#line 557
+#line 578
                     Vector<float, 4>  rot_4;
 
-#line 577
+#line 598
                     if(ch_0 == 0U)
                     {
 
-#line 577
-                        Vector<float, 4>  _S147 = bk_sample_0(tk_0, tt_1, _S123, lm_1, 0U, &kernelContext_2);
-                        Vector<float, 3>  _S148 = Vector<float, 3> {_S147.x, _S147.y, _S147.z};
+#line 598
+                        Vector<float, 4>  _S152 = bk_sample_0(tk_0, tt_1, _S128, lm_1, 0U, &kernelContext_2);
+                        Vector<float, 3>  _S153 = Vector<float, 3> {_S152.x, _S152.y, _S152.z};
 
-#line 578
-                        Vector<float, 4>  _S149 = bk_sample_0(tk_0, pv_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 599
+                        Vector<float, 4>  _S154 = bk_sample_0(tk_0, pv_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 578
-                        Vector<float, 3>  d_4 = _S148 - Vector<float, 3> {_S149.x, _S149.y, _S149.z};
+#line 599
+                        Vector<float, 3>  d_4 = _S153 - Vector<float, 3> {_S154.x, _S154.y, _S154.z};
                         if(((&kernelContext_2)->globalParams_0->params_0->local_0) != 0U)
                         {
 
-#line 579
-                            _S137 = _S124 != 4294967295U;
+#line 600
+                            _S142 = _S129 != 4294967295U;
 
-#line 579
+#line 600
                         }
                         else
                         {
 
-#line 579
-                            _S137 = false;
+#line 600
+                            _S142 = false;
 
-#line 579
+#line 600
                         }
 
-#line 579
-                        if(_S137)
+#line 600
+                        if(_S142)
                         {
 
-#line 580
-                            if(_S124 == 4294967294U)
+#line 601
+                            if(_S129 == 4294967294U)
                             {
 
-#line 580
-                                rot_4 = _S117;
+#line 601
+                                rot_4 = _S122;
 
-#line 580
+#line 601
                             }
                             else
                             {
 
-#line 580
-                                Vector<float, 4>  _S150 = bk_sample_0(_S124, tt_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 601
+                                Vector<float, 4>  _S155 = bk_sample_0(_S129, tt_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 580
-                                rot_4 = _S150;
+#line 601
+                                rot_4 = _S155;
 
-#line 580
+#line 601
                             }
 
-#line 580
+#line 601
                             loc_4 = bk_xform_inv_0(rot_4, d_4);
 
-#line 579
+#line 600
                         }
                         else
                         {
 
-#line 579
+#line 600
                             loc_4 = d_4;
 
-#line 579
+#line 600
                         }
 
-#line 579
+#line 600
                         loc_4 = loc_3 + loc_4 * (Vector<float, 3> )bl_1;
 
-#line 577
+#line 598
                     }
                     else
                     {
 
-#line 577
+#line 598
                         loc_4 = loc_3;
 
-#line 577
+#line 598
                     }
 
-#line 585
+#line 606
                     if(ch_0 == 1U)
                     {
 
-#line 585
-                        Vector<float, 4>  _S151 = bk_sample_0(tk_0, pv_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 606
+                        Vector<float, 4>  _S156 = bk_sample_0(tk_0, pv_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 585
-                        Vector<float, 4>  _S152 = bk_sample_0(tk_0, tt_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 606
+                        Vector<float, 4>  _S157 = bk_sample_0(tk_0, tt_1, _S128, lm_1, 0U, &kernelContext_2);
 
 
-                        Vector<float, 4>  nr_2 = bk_qmul_0(rot_3, bk_slerp_0(_S117, bk_qmul_0(bk_qinv_0(_S151), _S152), bl_1));
+                        Vector<float, 4>  nr_2 = bk_qmul_0(rot_3, bk_slerp_0(_S122, bk_qmul_0(bk_qinv_0(_S156), _S157), bl_1));
 
-#line 588
+#line 609
                         rot_4 = nr_2 / (Vector<float, 4> )(F32_max((length_1(nr_2)), (9.99999968265522539e-21f)));
 
-#line 585
+#line 606
                     }
                     else
                     {
 
-#line 585
+#line 606
                         rot_4 = rot_3;
 
-#line 585
+#line 606
                     }
 
-#line 585
+#line 606
                     Vector<float, 3>  sc_4;
 
-#line 591
+#line 612
                     if(ch_0 == 2U)
                     {
 
-#line 591
-                        Vector<float, 4>  _S153 = bk_sample_0(tk_0, tt_1, _S123, lm_1, 0U, &kernelContext_2);
-                        Vector<float, 3>  _S154 = Vector<float, 3> {_S153.x, _S153.y, _S153.z};
+#line 612
+                        Vector<float, 4>  _S158 = bk_sample_0(tk_0, tt_1, _S128, lm_1, 0U, &kernelContext_2);
+                        Vector<float, 3>  _S159 = Vector<float, 3> {_S158.x, _S158.y, _S158.z};
 
-#line 592
-                        Vector<float, 4>  _S155 = bk_sample_0(tk_0, pv_1, _S123, lm_1, 0U, &kernelContext_2);
+#line 613
+                        Vector<float, 4>  _S160 = bk_sample_0(tk_0, pv_1, _S128, lm_1, 0U, &kernelContext_2);
 
-#line 592
-                        sc_4 = sc_3 + (_S154 - Vector<float, 3> {_S155.x, _S155.y, _S155.z}) * (Vector<float, 3> )bl_1;
+#line 613
+                        sc_4 = sc_3 + (_S159 - Vector<float, 3> {_S160.x, _S160.y, _S160.z}) * (Vector<float, 3> )bl_1;
 
-#line 591
+#line 612
                     }
                     else
                     {
 
-#line 591
+#line 612
                         sc_4 = sc_3;
 
-#line 591
+#line 612
                     }
 
-#line 591
+#line 612
                     loc_1 = loc_4;
 
-#line 591
+#line 612
                     rot_1 = rot_4;
 
-#line 591
+#line 612
                     sc_1 = sc_4;
 
-#line 535
+#line 556
                 }
                 else
                 {
 
-#line 535
+#line 556
                     loc_1 = loc_2;
 
-#line 535
+#line 556
                     rot_1 = rot_2;
 
-#line 535
+#line 556
                     sc_1 = sc_2;
 
-#line 535
+#line 556
                 }
 
-#line 533
+#line 554
                 uint32_t ch_1 = ch_0 + 1U;
 
-#line 533
+#line 554
                 loc_2 = loc_1;
 
-#line 533
+#line 554
                 rot_2 = rot_1;
 
-#line 533
+#line 554
                 sc_2 = sc_1;
 
-#line 533
+#line 554
                 ch_0 = ch_1;
 
-#line 533
+#line 554
             }
 
-#line 533
+#line 554
             loc_1 = loc_2;
 
-#line 533
+#line 554
             rot_1 = rot_2;
 
-#line 533
+#line 554
             sc_1 = sc_2;
 
-#line 514
+#line 535
         }
         else
         {
 
-#line 514
+#line 535
             loc_1 = loc_0;
 
-#line 514
+#line 535
             rot_1 = rot_0;
 
-#line 514
+#line 535
             sc_1 = sc_0;
 
-#line 514
+#line 535
         }
 
-#line 508
+#line 529
         uint32_t i_4 = i_3 + 1U;
 
-#line 508
+#line 529
         loc_0 = loc_1;
 
-#line 508
+#line 529
         rot_0 = rot_1;
 
-#line 508
+#line 529
         sc_0 = sc_1;
 
-#line 508
+#line 529
         i_3 = i_4;
 
-#line 508
+#line 529
     }
 
-#line 598
+#line 619
     *(&((&kernelContext_2)->globalParams_0->rootMotion_0)[0U]) = loc_0.x;
     *(&((&kernelContext_2)->globalParams_0->rootMotion_0)[1U]) = loc_0.y;
     *(&((&kernelContext_2)->globalParams_0->rootMotion_0)[2U]) = loc_0.z;

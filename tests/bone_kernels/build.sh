@@ -54,6 +54,17 @@ for fx in "$HERE"/fixtures_sample/*/; do
 		fi
 	done
 done
+# Compressed tracks have no transitions, so only the late-time control applies.
+for fx in "$HERE"/fixtures_sample_compressed/*/; do
+	fx=${fx%/}
+	"$OUT/sample_test" "$fx" || rc=1
+	if "$OUT/sample_test" "$fx" --control-time > /dev/null; then
+		echo "control --control-time passed on compressed $(basename "$fx"), so the test cannot see that difference" >&2
+		rc=1
+	else
+		echo "control --control-time failed on compressed $(basename "$fx"), as it must"
+	fi
+done
 for fx in "$HERE"/fixtures_blend "$HERE"/fixtures_blend_nodes; do
 	"$OUT/blend_test" "$fx" || rc=1
 	for c in --control-order --control-deterministic --control-filter; do

@@ -395,6 +395,27 @@ float4 bk_sample(uint i, float2 tdf, float2 Ldf, uint loopMode, uint backward) {
     }
   }
   int base = (back ? min(mid, len) : min(mid, (len - 1)));
+  if ((((flags >> 6u) & 1u) != 0u)) {
+    tdf = ((tdf.x < 0.000000) ? float2(0.000000, 0.000000) : tdf);
+    tdf = (((bk_df_sub(tdf, Ldf).x + bk_df_sub(tdf, Ldf).y) > 0.000000) ? Ldf : tdf);
+    int clo = 0;
+    int chi = len;
+    while ((clo < chi)) {
+      int cm = ((clo + chi) / 2);
+      if (((bk_df_sub(float2(keyTime[(off + uint(cm))], keyTimeLo[(off + uint(cm))]), tdf).x + bk_df_sub(float2(keyTime[(off + uint(cm))], keyTimeLo[(off + uint(cm))]), tdf).y) <= 0.000000)) {
+        clo = (cm + 1);
+      } else {
+        chi = cm;
+      }
+    }
+    base = (clo - 1);
+    if ((base >= 0)) {
+      int ps = (base - int(keyTrans[(off + uint(base))]));
+      if (((bk_df_sub(float2(keyTime[(off + uint(ps))], keyTimeLo[(off + uint(ps))]), tdf).x + bk_df_sub(float2(keyTime[(off + uint(ps))], keyTimeLo[(off + uint(ps))]), tdf).y) == 0.000000)) {
+        base = ps;
+      }
+    }
+  }
   int pm2 = (back ? (base - (-2)) : (base + (-2)));
   int pm1 = (back ? (base - (-1)) : (base + (-1)));
   int pn0 = (back ? (base - 0) : (base + 0));
@@ -419,7 +440,7 @@ float4 bk_sample(uint i, float2 tdf, float2 Ldf, uint loopMode, uint backward) {
   float4 vn1 = float4(keyVal[(((off + uint(kn1)) * 4u) + 0u)], keyVal[(((off + uint(kn1)) * 4u) + 1u)], keyVal[(((off + uint(kn1)) * 4u) + 2u)], keyVal[(((off + uint(kn1)) * 4u) + 3u)]);
   float4 vn2 = float4(keyVal[(((off + uint(kn2)) * 4u) + 0u)], keyVal[(((off + uint(kn2)) * 4u) + 1u)], keyVal[(((off + uint(kn2)) * 4u) + 2u)], keyVal[(((off + uint(kn2)) * 4u) + 3u)]);
   float4 vn3 = float4(keyVal[(((off + uint(kn3)) * 4u) + 0u)], keyVal[(((off + uint(kn3)) * 4u) + 1u)], keyVal[(((off + uint(kn3)) * 4u) + 2u)], keyVal[(((off + uint(kn3)) * 4u) + 3u)]);
-  float tr = keyTrans[(off + uint(kn0))];
+  float tr = ((((flags >> 6u) & 1u) != 0u) ? 1.000000 : keyTrans[(off + uint(kn0))]);
   if ((tr == 0.000000)) {
     return vn0;
   }

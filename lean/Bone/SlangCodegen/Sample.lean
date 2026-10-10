@@ -40,7 +40,13 @@ scale 7–9. `trackDst` is the first float the track writes.
 one float in `x`). For scalars the angle modes are the engine's angle forms
 (`lerp_angle`, `cubic_interpolate_angle_in_time`,
 `makima_interpolate_angle_in_time`), each wrapped by `fposmod(·, TAU)`, as the
-engine does for float keys.
+engine does for float keys. Bit 6 marks a compressed track
+(`Animation::_*_interpolate_compressed`): the host feeds it as linear with
+wrap off and every key, including keys past the clip end; the kernel clamps
+the time to the clip and takes the last key at or before it, and its
+`keyTrans` holds, per key, how many keys back the engine's answer at exactly
+that key's time lies (non-zero only where quantised key times coincide at
+the start of a compression packet).
 
 Bindings (set 0):
 
@@ -144,7 +150,26 @@ def sampleFn : SlangFunctionDecl :=
                [ if_ (not_ (v "back"))
                    [ if_ (gt (at_ "keyTime" (v "off" + toU (v "mid"))) (v "t")) [ setv "mid" (v "mid" - fi 1) ] ]
                    [ if_ (lt (at_ "keyTime" (v "off" + toU (v "mid"))) (v "t")) [ setv "mid" (v "mid" + fi 1) ] ] ]
-           , let_ iT "base" (sel (v "back") (fmin (v "mid") (v "len")) (fmin (v "mid") (v "len" - fi 1))) ] ++
+           , let_ iT "base" (sel (v "back") (fmin (v "mid") (v "len")) (fmin (v "mid") (v "len" - fi 1)))
+           -- A compressed track (bit 6) fetches as `_fetch_compressed`: the time clamped to the
+           -- clip, then the last key at or before it, compared exactly (quantised key times can
+           -- coincide: just after a shared time the later key wins, at exactly that time the first).
+           , if_ (ne (.bin "&" (.bin ">>" (v "flags") (u 6)) (u 1)) (u 0))
+               [ setv "tdf" (sel (lt (mem (v "tdf") "x") (fl 0.0)) (call "float2" [fl 0.0, fl 0.0]) (v "tdf"))
+               , setv "tdf" (sel (gt (dfd (v "tdf") (v "Ldf")) (fl 0.0)) (v "Ldf") (v "tdf"))
+               , let_ iT "clo" (fi 0)
+               , let_ iT "chi" (v "len")
+               , while_ (lt (v "clo") (v "chi"))
+                   [ let_ iT "cm" ((v "clo" + v "chi") / fi 2)
+                   , if_ (le (dfd (call "float2" [at_ "keyTime" (v "off" + toU (v "cm")), at_ "keyTimeLo" (v "off" + toU (v "cm"))]) (v "tdf")) (fl 0.0))
+                       [ setv "clo" (v "cm" + fi 1) ] [ setv "chi" (v "cm") ] ]
+               , setv "base" (v "clo" - fi 1)
+               -- at exactly a shared key time the engine returns the first key of the packet that
+               -- starts there; `keyTrans` of a compressed key holds how many keys back that is
+               , if_ (ge (v "base") (fi 0))
+                   [ let_ iT "ps" (v "base" - toI (at_ "keyTrans" (v "off" + toU (v "base"))))
+                   , if_ (eq (dfd (call "float2" [at_ "keyTime" (v "off" + toU (v "ps")), at_ "keyTimeLo" (v "off" + toU (v "ps"))]) (v "tdf")) (fl 0.0))
+                       [ setv "base" (v "ps") ] ] ] ] ++
            -- _fetch_keys: slot j is base + j (base − j backward)
            (slots.map fun (n, j) =>
              let_ iT ("p" ++ n) (sel (v "back") (v "base" - fi j) (v "base" + fi j))) ++
@@ -153,7 +178,7 @@ def sampleFn : SlangFunctionDecl :=
            (slots.map fun (n, _) =>
              let_ f2T ("t" ++ n) (call "bk_fetch_time" [v ("p" ++ n), v "len", v "wrap", v "loopMode", v "off", v "Ldf"])) ++
            (slots.map fun (n, _) => let_ f4T ("v" ++ n) (kv n)) ++
-           [ let_ fT "tr" (at_ "keyTrans" (v "off" + toU (v "kn0")))
+           [ let_ fT "tr" (sel (ne (.bin "&" (.bin ">>" (v "flags") (u 6)) (u 1)) (u 0)) (fl 1.0) (at_ "keyTrans" (v "off" + toU (v "kn0"))))
            , if_ (eq (v "tr") (fl 0.0)) (writeVec (v "vn0"))
            , let_ fT "dlt" (dfd (v "tn1") (v "tn0"))
            , let_ fT "w" (sel (lt (fabs (v "dlt")) eps) (fl 0.0) (dfd (v "tdf") (v "tn0") / v "dlt"))
